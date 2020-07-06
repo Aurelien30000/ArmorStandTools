@@ -65,7 +65,7 @@ abstract class NMS {
 
     private int getDisabledSlots(ArmorStand as) {
         Object nmsEntity = getNmsEntity(as);
-        if(nmsEntity == null) return 0;
+        if (nmsEntity == null) return 0;
         Field f;
         try {
             f = nmsEntity.getClass().getDeclaredField(disabledSlotsFieldName);
@@ -105,24 +105,24 @@ abstract class NMS {
     }
 
     private String getItemStackTags(ItemStack is) {
-        if(is == null) {
+        if (is == null) {
             return "";
         }
         StringBuilder tags = new StringBuilder();
-        if(is.getItemMeta() != null && is.getItemMeta() instanceof LeatherArmorMeta) {
+        if (is.getItemMeta() != null && is.getItemMeta() instanceof LeatherArmorMeta) {
             LeatherArmorMeta armorMeta = (LeatherArmorMeta) is.getItemMeta();
             tags.append("display:{color:");
             tags.append(armorMeta.getColor().asRGB());
             tags.append("}");
         }
         Map<Enchantment, Integer> enchants = is.getEnchantments();
-        if(enchants.size() > 0) {
-            if(tags.length() > 0) {
+        if (enchants.size() > 0) {
+            if (tags.length() > 0) {
                 tags.append(",");
             }
             tags.append("Enchantments:[");
 
-            for(Enchantment e : enchants.keySet()) {
+            for (Enchantment e : enchants.keySet()) {
                 tags.append("{id:");
                 tags.append(e.getKey().getKey());
                 tags.append(",lvl:");
@@ -136,11 +136,11 @@ abstract class NMS {
     }
 
     private String skullOwner(ItemStack is) {
-        if(is == null || is.getItemMeta() == null || !(is.getItemMeta() instanceof SkullMeta)) {
+        if (is == null || is.getItemMeta() == null || !(is.getItemMeta() instanceof SkullMeta)) {
             return "";
         }
         SkullMeta skull = (SkullMeta) is.getItemMeta();
-        if(skull.hasOwner()) {
+        if (skull.hasOwner()) {
             return ",SkullOwner:\"" + skull.getOwningPlayer().getName() + "\"";
         } else {
             return "";
@@ -152,37 +152,37 @@ abstract class NMS {
         b.setType(Material.COMMAND_BLOCK);
         CommandBlock cb = (CommandBlock) b.getState();
         cb.setCommand("summon minecraft:armor_stand " + Utils.twoDec(as.getLocation().getX()) + " " + Utils.twoDec(as.getLocation().getY()) + " " + Utils.twoDec(as.getLocation().getZ()) + " "
-            + "{"
-                + (as.isVisible()                  ? ""                     : "Invisible:1,"                                                  )
-                + (as.hasBasePlate()               ? ""                     : "NoBasePlate:1,"                                                )
-                + (as.hasGravity()                 ? ""                     : "NoGravity:1,"                                                  )
-                + (as.hasArms()                    ? "ShowArms:1,"          : ""                                                              )
-                + (as.isSmall()                    ? "Small:1,"             : ""                                                              )
-                + (as.isInvulnerable()             ? "Invulnerable:1,"      : ""                                                              )
-                + (as.isGlowing()                  ? "Glowing:1,"           : ""                                                              )
-                + (getDisabledSlots(as) == 0       ? ""                     : ("DisabledSlots:" + getDisabledSlots(as) + ",")                 )
-                + (as.isCustomNameVisible()        ? "CustomNameVisible:1," : ""                                                              )
-                + (as.getCustomName() == null      ? ""                     : ("CustomName:\"\\\"" + as.getCustomName() + "\\\"\",")          )
-                + (as.getLocation().getYaw() == 0F ? ""                     : ("Rotation:[" + Utils.twoDec(as.getLocation().getYaw()) + "f],"))
+                + "{"
+                + (as.isVisible() ? "" : "Invisible:1,")
+                + (as.hasBasePlate() ? "" : "NoBasePlate:1,")
+                + (as.hasGravity() ? "" : "NoGravity:1,")
+                + (as.hasArms() ? "ShowArms:1," : "")
+                + (as.isSmall() ? "Small:1," : "")
+                + (as.isInvulnerable() ? "Invulnerable:1," : "")
+                + (as.isGlowing() ? "Glowing:1," : "")
+                + (getDisabledSlots(as) == 0 ? "" : ("DisabledSlots:" + getDisabledSlots(as) + ","))
+                + (as.isCustomNameVisible() ? "CustomNameVisible:1," : "")
+                + (as.getCustomName() == null ? "" : ("CustomName:\"\\\"" + as.getCustomName() + "\\\"\","))
+                + (as.getLocation().getYaw() == 0F ? "" : ("Rotation:[" + Utils.twoDec(as.getLocation().getYaw()) + "f],"))
                 + "ArmorItems:["
-                    + (as.getBoots()      == null ? "{}," : ("{id:" + as.getBoots().getType().getKey().getKey()      + ",Count:" + as.getBoots().getAmount()      + ",tag:{Damage:" + as.getBoots().getDurability()      + getItemStackTags(as.getBoots())                               + "}},"))
-                    + (as.getLeggings()   == null ? "{}," : ("{id:" + as.getLeggings().getType().getKey().getKey()   + ",Count:" + as.getLeggings().getAmount()   + ",tag:{Damage:" + as.getLeggings().getDurability()   + getItemStackTags(as.getLeggings())                            + "}},"))
-                    + (as.getChestplate() == null ? "{}," : ("{id:" + as.getChestplate().getType().getKey().getKey() + ",Count:" + as.getChestplate().getAmount() + ",tag:{Damage:" + as.getChestplate().getDurability() + getItemStackTags(as.getChestplate())                          + "}},"))
-                    + (as.getHelmet()     == null ? "{}"  : ("{id:" + as.getHelmet().getType().getKey().getKey()     + ",Count:" + as.getHelmet().getAmount()     + ",tag:{Damage:" + as.getHelmet().getDurability()     + getItemStackTags(as.getHelmet()) + skullOwner(as.getHelmet()) + "}}" ))
+                + (as.getBoots() == null ? "{}," : ("{id:" + as.getBoots().getType().getKey().getKey() + ",Count:" + as.getBoots().getAmount() + ",tag:{Damage:" + as.getBoots().getDurability() + getItemStackTags(as.getBoots()) + "}},"))
+                + (as.getLeggings() == null ? "{}," : ("{id:" + as.getLeggings().getType().getKey().getKey() + ",Count:" + as.getLeggings().getAmount() + ",tag:{Damage:" + as.getLeggings().getDurability() + getItemStackTags(as.getLeggings()) + "}},"))
+                + (as.getChestplate() == null ? "{}," : ("{id:" + as.getChestplate().getType().getKey().getKey() + ",Count:" + as.getChestplate().getAmount() + ",tag:{Damage:" + as.getChestplate().getDurability() + getItemStackTags(as.getChestplate()) + "}},"))
+                + (as.getHelmet() == null ? "{}" : ("{id:" + as.getHelmet().getType().getKey().getKey() + ",Count:" + as.getHelmet().getAmount() + ",tag:{Damage:" + as.getHelmet().getDurability() + getItemStackTags(as.getHelmet()) + skullOwner(as.getHelmet()) + "}}"))
                 + "],"
                 + "HandItems:["
-                    + (as.getEquipment().getItemInMainHand() == null ? "{}," : ("{id:" + as.getEquipment().getItemInMainHand().getType().getKey().getKey() + ",Count:" + as.getEquipment().getItemInMainHand().getAmount() + ",tag:{Damage:" + as.getEquipment().getItemInMainHand().getDurability() + getItemStackTags(as.getEquipment().getItemInMainHand()) + "}},"))
-                    + (as.getEquipment().getItemInOffHand()  == null ? "{}"  : ("{id:" + as.getEquipment().getItemInOffHand().getType().getKey().getKey()  + ",Count:" + as.getEquipment().getItemInOffHand().getAmount()  + ",tag:{Damage:" + as.getEquipment().getItemInOffHand().getDurability()  + getItemStackTags(as.getEquipment().getItemInOffHand())  + "}}" ))
+                + (as.getEquipment().getItemInMainHand() == null ? "{}," : ("{id:" + as.getEquipment().getItemInMainHand().getType().getKey().getKey() + ",Count:" + as.getEquipment().getItemInMainHand().getAmount() + ",tag:{Damage:" + as.getEquipment().getItemInMainHand().getDurability() + getItemStackTags(as.getEquipment().getItemInMainHand()) + "}},"))
+                + (as.getEquipment().getItemInOffHand() == null ? "{}" : ("{id:" + as.getEquipment().getItemInOffHand().getType().getKey().getKey() + ",Count:" + as.getEquipment().getItemInOffHand().getAmount() + ",tag:{Damage:" + as.getEquipment().getItemInOffHand().getDurability() + getItemStackTags(as.getEquipment().getItemInOffHand()) + "}}"))
                 + "],"
                 + "Pose:{"
-                    + "Body:["     + Utils.angle(as.getBodyPose().getX())     + "f," + Utils.angle(as.getBodyPose().getY())     + "f," + Utils.angle(as.getBodyPose().getZ())     + "f],"
-                    + "Head:["     + Utils.angle(as.getHeadPose().getX())     + "f," + Utils.angle(as.getHeadPose().getY())     + "f," + Utils.angle(as.getHeadPose().getZ())     + "f],"
-                    + "LeftLeg:["  + Utils.angle(as.getLeftLegPose().getX())  + "f," + Utils.angle(as.getLeftLegPose().getY())  + "f," + Utils.angle(as.getLeftLegPose().getZ())  + "f],"
-                    + "RightLeg:[" + Utils.angle(as.getRightLegPose().getX()) + "f," + Utils.angle(as.getRightLegPose().getY()) + "f," + Utils.angle(as.getRightLegPose().getZ()) + "f],"
-                    + "LeftArm:["  + Utils.angle(as.getLeftArmPose().getX())  + "f," + Utils.angle(as.getLeftArmPose().getY())  + "f," + Utils.angle(as.getLeftArmPose().getZ())  + "f],"
-                    + "RightArm:[" + Utils.angle(as.getRightArmPose().getX()) + "f," + Utils.angle(as.getRightArmPose().getY()) + "f," + Utils.angle(as.getRightArmPose().getZ()) + "f]"
+                + "Body:[" + Utils.angle(as.getBodyPose().getX()) + "f," + Utils.angle(as.getBodyPose().getY()) + "f," + Utils.angle(as.getBodyPose().getZ()) + "f],"
+                + "Head:[" + Utils.angle(as.getHeadPose().getX()) + "f," + Utils.angle(as.getHeadPose().getY()) + "f," + Utils.angle(as.getHeadPose().getZ()) + "f],"
+                + "LeftLeg:[" + Utils.angle(as.getLeftLegPose().getX()) + "f," + Utils.angle(as.getLeftLegPose().getY()) + "f," + Utils.angle(as.getLeftLegPose().getZ()) + "f],"
+                + "RightLeg:[" + Utils.angle(as.getRightLegPose().getX()) + "f," + Utils.angle(as.getRightLegPose().getY()) + "f," + Utils.angle(as.getRightLegPose().getZ()) + "f],"
+                + "LeftArm:[" + Utils.angle(as.getLeftArmPose().getX()) + "f," + Utils.angle(as.getLeftArmPose().getY()) + "f," + Utils.angle(as.getLeftArmPose().getZ()) + "f],"
+                + "RightArm:[" + Utils.angle(as.getRightArmPose().getX()) + "f," + Utils.angle(as.getRightArmPose().getY()) + "f," + Utils.angle(as.getRightArmPose().getZ()) + "f]"
                 + "}"
-            + "}"
+                + "}"
         );
         cb.update();
     }
@@ -212,7 +212,7 @@ abstract class NMS {
         clone.setGlowing(as.isGlowing());
         setSlotsDisabled(clone, getDisabledSlots(as) == 0xFFFFFF);
         ArmorStandCmd asCmd = new ArmorStandCmd(as);
-        if(asCmd.getCommand() != null) {
+        if (asCmd.getCommand() != null) {
             asCmd.cloneTo(clone);
         }
         return clone;

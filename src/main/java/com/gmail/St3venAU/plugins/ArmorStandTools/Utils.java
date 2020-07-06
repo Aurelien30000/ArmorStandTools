@@ -20,8 +20,8 @@ class Utils {
     private static DecimalFormat twoDec;
 
     static boolean containsItems(Collection<ItemStack> items) {
-        for(ItemStack i : items) {
-            if(ArmorStandTool.get(i) != null) {
+        for (ItemStack i : items) {
+            if (ArmorStandTool.get(i) != null) {
                 return true;
             }
         }
@@ -51,8 +51,8 @@ class Utils {
     }
 
     static boolean hasAnyTools(Player p) {
-        for(ItemStack i : p.getInventory()) {
-            if(ArmorStandTool.isTool(i)) {
+        for (ItemStack i : p.getInventory()) {
+            if (ArmorStandTool.isTool(i)) {
                 return true;
             }
         }
@@ -92,7 +92,6 @@ class Utils {
             i.setItem(18 + n, i.getItem(9 + n));
             i.setItem(9 + n, temp);
         }
-        //noinspection deprecation
         p.updateInventory();
     }
 
@@ -101,7 +100,7 @@ class Utils {
     }
 
     static String twoDec(double d) {
-        if(twoDec == null) {
+        if (twoDec == null) {
             twoDec = new DecimalFormat("0.0#");
             DecimalFormatSymbols symbols = new DecimalFormatSymbols();
             symbols.setDecimalSeparator('.');
@@ -111,7 +110,7 @@ class Utils {
     }
 
     static Block findAnAirBlock(Location l) {
-        while(l.getY() < 255 && l.getBlock().getType() != Material.AIR) {
+        while (l.getY() < 255 && l.getBlock().getType() != Material.AIR) {
             l.add(0, 1, 0);
         }
         return l.getY() < 255 && l.getBlock().getType() == Material.AIR ? l.getBlock() : null;

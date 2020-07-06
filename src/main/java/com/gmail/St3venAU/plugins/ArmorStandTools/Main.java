@@ -30,19 +30,18 @@ public class Main extends JavaPlugin {
 
     static NMS nms;
 
-    final HashMap<UUID, ArmorStand> carryingArmorStand = new HashMap<UUID, ArmorStand>();
-    final HashMap<UUID, ItemStack[]> savedInventories = new HashMap<UUID, ItemStack[]>();
+    final HashMap<UUID, ArmorStand> carryingArmorStand = new HashMap<>();
+    final HashMap<UUID, ItemStack[]> savedInventories = new HashMap<>();
 
     static Main plugin;
 
-    @SuppressWarnings("unchecked")
     @Override
     public void onLoad() {
         if (getServer().getPluginManager().getPlugin("WorldGuard") != null) {
             try {
                 // Need to do this with reflection for some reason, otherwise plugin load fails when worldguard is not present, even though this code block is not actually executed unless worldguard is present ???
                 WG_AST_FLAG = Class.forName("com.sk89q.worldguard.protection.flags.StateFlag").getConstructor(String.class, boolean.class).newInstance("ast", true);
-                Class worldGuardClass = Class.forName("com.sk89q.worldguard.WorldGuard");
+                Class<?> worldGuardClass = Class.forName("com.sk89q.worldguard.WorldGuard");
                 Object worldGuard = worldGuardClass.getMethod("getInstance").invoke(worldGuardClass);
                 Object flagRegistry = worldGuardClass.getMethod("getFlagRegistry").invoke(worldGuard);
                 flagRegistry.getClass().getMethod("register", Class.forName("com.sk89q.worldguard.protection.flags.Flag")).invoke(flagRegistry, WG_AST_FLAG);
@@ -56,11 +55,11 @@ public class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         plugin = this;
-        if(!loadSpigotVersionSupport()) {
+        if (!loadSpigotVersionSupport()) {
             setEnabled(false);
             return;
         }
-        getServer().getPluginManager().registerEvents(new  MainListener(this), this);
+        getServer().getPluginManager().registerEvents(new MainListener(this), this);
         Commands cmds = new Commands(this);
         getCommand("astools").setExecutor(cmds);
         getCommand("ascmd").setExecutor(cmds);
@@ -70,14 +69,14 @@ public class Main extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        for(ArmorStand as : carryingArmorStand.values()) {
+        for (ArmorStand as : carryingArmorStand.values()) {
             returnArmorStand(as);
         }
         carryingArmorStand.clear();
         Player p;
-        for(UUID uuid : savedInventories.keySet()) {
+        for (UUID uuid : savedInventories.keySet()) {
             p = getServer().getPlayer(uuid);
-            if(p != null && p.isOnline()) {
+            if (p != null && p.isOnline()) {
                 restoreInventory(p);
             }
         }
@@ -87,14 +86,14 @@ public class Main extends JavaPlugin {
     private boolean loadSpigotVersionSupport() {
         String nmsVersion = getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
         String usingVersion;
-        if(nmsVersion.startsWith("v1_4")  || nmsVersion.startsWith("v1_5")  || nmsVersion.startsWith("v1_6") ||
-           nmsVersion.startsWith("v1_7")  || nmsVersion.startsWith("v1_8")  || nmsVersion.startsWith("v1_9") ||
-           nmsVersion.startsWith("v1_10") || nmsVersion.startsWith("v1_11") || nmsVersion.startsWith("v1_12")) {
+        if (nmsVersion.startsWith("v1_4") || nmsVersion.startsWith("v1_5") || nmsVersion.startsWith("v1_6") ||
+                nmsVersion.startsWith("v1_7") || nmsVersion.startsWith("v1_8") || nmsVersion.startsWith("v1_9") ||
+                nmsVersion.startsWith("v1_10") || nmsVersion.startsWith("v1_11") || nmsVersion.startsWith("v1_12")) {
             getLogger().warning("This Craftbukkit/Spigot version is not supported. Craftbukkit/Spigot 1.13+ required. Loading plugin failed.");
             return false;
         }
         try {
-            if(NMS.class.isAssignableFrom(Class.forName("com.gmail.St3venAU.plugins.ArmorStandTools.NMS_" + nmsVersion))) {
+            if (NMS.class.isAssignableFrom(Class.forName("com.gmail.St3venAU.plugins.ArmorStandTools.NMS_" + nmsVersion))) {
                 usingVersion = nmsVersion;
                 getLogger().info("Loading support for " + usingVersion);
             } else {
@@ -116,7 +115,7 @@ public class Main extends JavaPlugin {
     }
 
     void returnArmorStand(ArmorStand as) {
-        if(as.hasMetadata("startLoc")) {
+        if (as.hasMetadata("startLoc")) {
             for (MetadataValue value : as.getMetadata("startLoc")) {
                 if (value.getOwningPlugin() == this) {
                     as.teleport((Location) value.value());
@@ -130,7 +129,7 @@ public class Main extends JavaPlugin {
 
     private void removeAllTools(Player p) {
         PlayerInventory i = p.getInventory();
-        for(ArmorStandTool t : ArmorStandTool.values()) {
+        for (ArmorStandTool t : ArmorStandTool.values()) {
             i.remove(t.getItem());
         }
     }
@@ -145,13 +144,13 @@ public class Main extends JavaPlugin {
         removeAllTools(p);
         UUID uuid = p.getUniqueId();
         ItemStack[] savedInv = savedInventories.get(uuid);
-        if(savedInv == null) return;
+        if (savedInv == null) return;
         PlayerInventory plrInv = p.getInventory();
         ItemStack[] newItems = plrInv.getContents().clone();
         plrInv.setContents(savedInv);
         savedInventories.remove(uuid);
-        for(ItemStack i : newItems) {
-            if(i == null) continue;
+        for (ItemStack i : newItems) {
+            if (i == null) continue;
             HashMap<Integer, ItemStack> couldntFit = plrInv.addItem(i);
             for (ItemStack is : couldntFit.values()) {
                 p.getWorld().dropItem(p.getLocation(), is);
@@ -162,13 +161,13 @@ public class Main extends JavaPlugin {
 
     void pickUpArmorStand(ArmorStand as, Player p, boolean newlySummoned) {
         carryingArmorStand.put(p.getUniqueId(), as);
-        if(newlySummoned) return;
+        if (newlySummoned) return;
         as.setMetadata("startLoc", new FixedMetadataValue(this, as.getLocation()));
     }
 
     void setName(Player p, ArmorStand as) {
         Block b = Utils.findAnAirBlock(p.getLocation());
-        if(b == null) {
+        if (b == null) {
             p.sendMessage(ChatColor.RED + Config.noAirError);
             return;
         }
@@ -180,7 +179,7 @@ public class Main extends JavaPlugin {
 
     void setPlayerSkull(Player p, ArmorStand as) {
         Block b = Utils.findAnAirBlock(p.getLocation());
-        if(b == null) {
+        if (b == null) {
             p.sendMessage(ChatColor.RED + Config.noAirError);
             return;
         }
@@ -191,18 +190,18 @@ public class Main extends JavaPlugin {
     }
 
     boolean checkBlockPermission(Player p, Block b) {
-        if(b == null) return true;
+        if (b == null) return true;
         debug("PlotSquaredHook.api: " + PlotSquaredHook.api);
         if (PlotSquaredHook.api != null) {
             Location l = b.getLocation();
             debug("PlotSquaredHook.isPlotWorld(l): " + PlotSquaredHook.isPlotWorld(l));
-            if(PlotSquaredHook.isPlotWorld(l)) {
+            if (PlotSquaredHook.isPlotWorld(l)) {
                 return PlotSquaredHook.checkPermission(p, l);
             }
         }
-        
-        if(Config.worldGuardPlugin != null) {
-            if(!Utils.hasPermissionNode(p, "astools.bypass-wg-flag") && !getWorldGuardAstFlag(b.getLocation())) {
+
+        if (Config.worldGuardPlugin != null) {
+            if (!Utils.hasPermissionNode(p, "astools.bypass-wg-flag") && !getWorldGuardAstFlag(b.getLocation())) {
                 return false;
             }
             return Config.worldGuardPlugin.createProtectionQuery().testBlockBreak(p, b);
@@ -211,25 +210,16 @@ public class Main extends JavaPlugin {
         Bukkit.getServer().getPluginManager().callEvent(breakEvent);
         return !breakEvent.isCancelled();
     }
-    
-    boolean checkArmorStandPermission(Player p, ArmorStand as) {
-        if (VehiclesHook.plugin != null) {
-        	if(VehiclesHook.isVehicleArmorStand(as)) {
-        		return false;
-        	}
-        }
-        return true;
-    }
-    
+
     private boolean getWorldGuardAstFlag(Location l) {
         RegionManager regions = WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(l.getWorld()));
-        if(regions == null) return true;
+        if (regions == null) return true;
         return regions.getApplicableRegions(BukkitAdapter.asBlockVector(l)).testState(null, (StateFlag) WG_AST_FLAG);
     }
 
     boolean playerHasPermission(Player p, Block b, ArmorStandTool tool) {
         debug("tool: " + tool);
-        if(tool != null) {
+        if (tool != null) {
             debug("en: " + tool.isEnabled());
             debug("perm: " + Utils.hasPermissionNode(p, tool.getPermission()));
         }
@@ -237,7 +227,7 @@ public class Main extends JavaPlugin {
     }
 
     void debug(String msg) {
-        if(Config.debug) {
+        if (Config.debug) {
             getLogger().log(Level.INFO, "[DEBUG] " + msg);
         }
     }

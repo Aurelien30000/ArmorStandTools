@@ -9,7 +9,8 @@ I wanted to create an armor stand for each kit in my mini-game, and I quickly be
 
 Compatibility
 -------------
-- Armor Stand Tools v3.x.x - Spigot/CraftBukkit 1.13 to 1.15 only
+- Armor Stand Tools v3.6.0 - Spigot/CraftBukkit 1.15 to 1.16 only
+- Armor Stand Tools v3.x.x -> 3.5.1 - Spigot/CraftBukkit 1.13 to 1.15 only
 - Armor Stand Tools v2.4.3 - Spigot/CraftBukkit 1.8, 1.9, 1.10, 1.11, 1.12 (https://www.spigotmc.org/resources/armor-stand-tools.2237/download?version=175162)
 
 Features
@@ -69,6 +70,7 @@ Permissions
 - astools.ascmd.assign.player: Permission to assign a player command to an armor stand
 - astools.ascmd.remove: Permission to remove a command from an armor stand
 - astools.ascmd.view: Permission to view the command assigned to an armor stand
+- astools.ascmd.cooldown: Permission to be able to modify cooldown on an armor stand
 - astools.ascmd.execute: Permission to execute a command assigned to an armor stand by (on right click)
 - astools.bypass-wg-flag: Permission to bypass the WorldGuard ast flag, allowing the player to use AST even in regions that ast flag is set to deny.
 
