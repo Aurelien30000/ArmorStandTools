@@ -125,6 +125,7 @@ class Config {
         cooldownSetTo = languageConfig.getString("cooldownSetTo");
         ticksFor = languageConfig.getString("ticksFor");
         setCooldown = languageConfig.getString("setCooldown");
+        removeCooldown = languageConfig.getString("removeCooldown");
         ticksFor = languageConfig.getString("ticksFor");
         cmdNotAllowed = languageConfig.getString("cmdNotAllowed");
         glow = languageConfig.getString("glow");
