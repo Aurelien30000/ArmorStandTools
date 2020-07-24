@@ -14,7 +14,7 @@
 
     <build>
         <defaultGoal>clean package install</defaultGoal>
-        <finalName>ArmorStandTools-${project.version}</finalName>
+        <finalName>ArmorStandTools</finalName>
         <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
         <resources>
             <resource>
