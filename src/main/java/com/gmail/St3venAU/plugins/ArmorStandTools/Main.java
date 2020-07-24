@@ -88,8 +88,9 @@ public class Main extends JavaPlugin {
         String usingVersion;
         if (nmsVersion.startsWith("v1_4") || nmsVersion.startsWith("v1_5") || nmsVersion.startsWith("v1_6") ||
                 nmsVersion.startsWith("v1_7") || nmsVersion.startsWith("v1_8") || nmsVersion.startsWith("v1_9") ||
-                nmsVersion.startsWith("v1_10") || nmsVersion.startsWith("v1_11") || nmsVersion.startsWith("v1_12")) {
-            getLogger().warning("This Craftbukkit/Spigot version is not supported. Craftbukkit/Spigot 1.13+ required. Loading plugin failed.");
+                nmsVersion.startsWith("v1_10") || nmsVersion.startsWith("v1_11") || nmsVersion.startsWith("v1_12") ||
+                nmsVersion.startsWith("v1_13") || nmsVersion.startsWith("v1_14")) {
+            getLogger().warning("This Craftbukkit/Spigot version is not supported. Craftbukkit/Spigot/Paper 1.15+ required. Loading plugin failed.");
             return false;
         }
         try {
