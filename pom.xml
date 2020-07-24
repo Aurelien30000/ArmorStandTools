@@ -48,6 +48,10 @@
             <id>IntellectualSites</id>
             <url>https://mvn.intellectualsites.com/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>chestshop-repo</id>
+            <url>https://repo.minebench.de/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -80,6 +84,12 @@
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.acrobot.chestshop</groupId>
+            <artifactId>chestshop</artifactId>
+            <version>3.11</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
