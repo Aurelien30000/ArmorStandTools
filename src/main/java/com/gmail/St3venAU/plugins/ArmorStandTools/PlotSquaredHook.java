@@ -32,7 +32,7 @@ class PlotSquaredHook {
             return player.hasPermission("plots.admin.build.road");
         }
         Plot plot = plotArea.getPlot(plotLocation);
-        PlotPlayer pp = PlotPlayer.wrap(player);
+        PlotPlayer<?> pp = PlotPlayer.wrap(player);
         plugin.debug("Plot: " + plot);
         if (plot == null) {
             plugin.debug("plots.admin.build.road: " + pp.hasPermission("plots.admin.build.road"));

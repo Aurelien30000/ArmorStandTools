@@ -72,7 +72,7 @@
         <dependency>
             <groupId>com.plotsquared</groupId>
             <artifactId>PlotSquared-Bukkit</artifactId>
-            <version>5.12.0</version>
+            <version>5.13.0</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
