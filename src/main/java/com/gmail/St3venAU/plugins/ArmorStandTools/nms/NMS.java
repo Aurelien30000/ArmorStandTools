@@ -1,5 +1,8 @@
-package com.gmail.St3venAU.plugins.ArmorStandTools;
+package com.gmail.St3venAU.plugins.ArmorStandTools.nms;
 
+import com.gmail.St3venAU.plugins.ArmorStandTools.ArmorStandCmd;
+import com.gmail.St3venAU.plugins.ArmorStandTools.Main;
+import com.gmail.St3venAU.plugins.ArmorStandTools.Utils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -16,13 +19,13 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-abstract class NMS {
+public abstract class NMS {
 
     private final String
             nmsVersion,
             disabledSlotsFieldName;
 
-    NMS(String nmsVersion, String disabledSlotsFieldName) {
+    public NMS(String nmsVersion, String disabledSlotsFieldName) {
         this.nmsVersion = nmsVersion;
         this.disabledSlotsFieldName = disabledSlotsFieldName;
     }
@@ -40,7 +43,7 @@ abstract class NMS {
         }
     }
 
-    void openSign(final Player p, final Block b) {
+    public void openSign(final Player p, final Block b) {
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -57,7 +60,7 @@ abstract class NMS {
         }.runTaskLater(Main.plugin, 2L);
     }
 
-    boolean toggleSlotsDisabled(ArmorStand as) {
+    public boolean toggleSlotsDisabled(ArmorStand as) {
         boolean slotsDisabled = getDisabledSlots(as) == 0;
         setSlotsDisabled(as, slotsDisabled);
         return slotsDisabled;
@@ -82,7 +85,7 @@ abstract class NMS {
         }
     }
 
-    void setSlotsDisabled(ArmorStand as, boolean slotsDisabled) {
+    public void setSlotsDisabled(ArmorStand as, boolean slotsDisabled) {
         Object nmsEntity = getNmsEntity(as);
         if (nmsEntity == null) return;
         Field f;
@@ -100,7 +103,7 @@ abstract class NMS {
         }
     }
 
-    boolean equipmentLocked(ArmorStand as) {
+    public boolean equipmentLocked(ArmorStand as) {
         return getDisabledSlots(as) == 0xFFFFFF;
     }
 
@@ -147,7 +150,7 @@ abstract class NMS {
         }
     }
 
-    void generateCmdBlock(Location l, ArmorStand as) {
+    public void generateCmdBlock(Location l, ArmorStand as) {
         Block b = l.getBlock();
         b.setType(Material.COMMAND_BLOCK);
         CommandBlock cb = (CommandBlock) b.getState();
@@ -187,7 +190,7 @@ abstract class NMS {
         cb.update();
     }
 
-    ArmorStand clone(ArmorStand as) {
+    public ArmorStand clone(ArmorStand as) {
         ArmorStand clone = (ArmorStand) as.getWorld().spawnEntity(as.getLocation().add(1, 0, 0), EntityType.ARMOR_STAND);
         clone.setGravity(as.hasGravity());
         clone.setHelmet(as.getHelmet());

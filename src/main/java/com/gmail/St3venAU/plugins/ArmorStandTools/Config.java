@@ -1,5 +1,8 @@
 package com.gmail.St3venAU.plugins.ArmorStandTools;
 
+import com.gmail.St3venAU.plugins.ArmorStandTools.hooks.ChestShopHook;
+import com.gmail.St3venAU.plugins.ArmorStandTools.hooks.PlotSquaredHook;
+import com.gmail.St3venAU.plugins.ArmorStandTools.hooks.ShopGuiPlusHook;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -172,19 +175,6 @@ class Config {
             tool.setEnabled(config);
         }
 
-        Plugin plotSquared = plugin.getServer().getPluginManager().getPlugin("PlotSquared");
-        if (plotSquared != null && plotSquared.isEnabled()) {
-            try {
-                new PlotSquaredHook(plugin);
-                plugin.getLogger().log(Level.INFO, "PlotSquared plugin was found. PlotSquared support enabled.");
-            } catch (Throwable e) {
-                e.printStackTrace();
-                plugin.getLogger().log(Level.WARNING, "PlotSquared plugin was found, but there was an error initializing PlotSquared support.");
-            }
-        } else {
-            plugin.getLogger().log(Level.INFO, "PlotSquared plugin not found. Continuing without PlotSquared support.");
-        }
-
         Plugin wgp = plugin.getServer().getPluginManager().getPlugin("WorldGuard");
         if (wgp instanceof WorldGuardPlugin) {
             worldGuardPlugin = (WorldGuardPlugin) wgp;
@@ -196,18 +186,9 @@ class Config {
             worldGuardPlugin = null;
         }
 
-        Plugin chestShop = plugin.getServer().getPluginManager().getPlugin("ChestShop");
-        if (chestShop != null && chestShop.isEnabled()) {
-            try {
-                new ChestShopHook(plugin);
-                plugin.getLogger().log(Level.INFO, "ChestShop plugin was found. ChestShop support enabled.");
-            } catch (Throwable e) {
-                e.printStackTrace();
-                plugin.getLogger().log(Level.WARNING, "ChestShop plugin was found, but there was an error initializing ChestShop support.");
-            }
-        } else {
-            plugin.getLogger().log(Level.INFO, "ChestShop plugin not found. Continuing without ChestShop support.");
-        }
+        new PlotSquaredHook(plugin);
+        new ChestShopHook(plugin);
+        new ShopGuiPlusHook(plugin);
     }
 
     private static void reloadLanguageConfig() {

@@ -15,11 +15,11 @@ import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Collection;
 
-class Utils {
+public class Utils {
 
     private static DecimalFormat twoDec;
 
-    static boolean containsItems(Collection<ItemStack> items) {
+    public static boolean containsItems(Collection<ItemStack> items) {
         for (ItemStack i : items) {
             if (ArmorStandTool.get(i) != null) {
                 return true;
@@ -28,7 +28,7 @@ class Utils {
         return false;
     }
 
-    static boolean hasPermissionNode(Player player, String perm, boolean ignoreOp) {
+    public static boolean hasPermissionNode(Player player, String perm, boolean ignoreOp) {
         if (!ignoreOp && ((player == null) || player.isOp())) {
             return true;
         }
@@ -46,11 +46,11 @@ class Utils {
         return false;
     }
 
-    static boolean hasPermissionNode(Player player, String perm) {
+    public static boolean hasPermissionNode(Player player, String perm) {
         return hasPermissionNode(player, perm, false);
     }
 
-    static boolean hasAnyTools(Player p) {
+    public static boolean hasAnyTools(Player p) {
         for (ItemStack i : p.getInventory()) {
             if (ArmorStandTool.isTool(i)) {
                 return true;
@@ -59,7 +59,7 @@ class Utils {
         return false;
     }
 
-    static Location getLocationFacing(Location loc) {
+    public static Location getLocationFacing(Location loc) {
         Location l = loc.clone();
         Vector v = l.getDirection();
         v.setY(0);
@@ -82,7 +82,7 @@ class Utils {
         return l;
     }
 
-    static void cycleInventory(Player p) {
+    public static void cycleInventory(Player p) {
         Inventory i = p.getInventory();
         ItemStack temp;
         for (int n = 0; n < 9; n++) {
@@ -95,11 +95,11 @@ class Utils {
         p.updateInventory();
     }
 
-    static String angle(double d) {
+    public static String angle(double d) {
         return twoDec(d * 180.0 / Math.PI);
     }
 
-    static String twoDec(double d) {
+    public static String twoDec(double d) {
         if (twoDec == null) {
             twoDec = new DecimalFormat("0.0#");
             DecimalFormatSymbols symbols = new DecimalFormatSymbols();
@@ -109,33 +109,34 @@ class Utils {
         return twoDec.format(d);
     }
 
-    static Block findAnAirBlock(Location l) {
+    public static Block findAnAirBlock(Location l) {
         while (l.getY() < 255 && l.getBlock().getType() != Material.AIR) {
             l.add(0, 1, 0);
         }
         return l.getY() < 255 && l.getBlock().getType() == Material.AIR ? l.getBlock() : null;
     }
 
-    static ItemStack setLore(ItemStack is, String... lore) {
+    public static ItemStack setLore(ItemStack is, String... lore) {
         ItemMeta meta = is.getItemMeta();
         meta.setLore(Arrays.asList(lore));
         is.setItemMeta(meta);
         return is;
     }
 
-    static boolean toggleInvulnerability(ArmorStand as) {
+    public static boolean toggleInvulnerability(ArmorStand as) {
         boolean inv = !as.isInvulnerable();
         as.setInvulnerable(inv);
         return inv;
     }
 
-    static void actionBarMsg(Player p, String msg) {
+    public static void actionBarMsg(Player p, String msg) {
         p.sendTitle("", msg, 0, 70, 0);
     }
 
-    static boolean toggleGlow(ArmorStand as) {
+    public static boolean toggleGlow(ArmorStand as) {
         boolean glowing = !as.isGlowing();
         as.setGlowing(glowing);
         return glowing;
     }
+
 }

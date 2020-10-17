@@ -1,5 +1,7 @@
 package com.gmail.St3venAU.plugins.ArmorStandTools;
 
+import com.gmail.St3venAU.plugins.ArmorStandTools.hooks.PlotSquaredHook;
+import com.gmail.St3venAU.plugins.ArmorStandTools.nms.NMS;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.StateFlag;
@@ -24,16 +26,16 @@ import java.util.logging.Level;
 
 public class Main extends JavaPlugin {
 
-    private static final String LATEST_VERSION = "v1_14_R1";
+    private static final String LATEST_VERSION = "v1_16_R2";
 
     private static Object WG_AST_FLAG;
 
-    static NMS nms;
+    public static NMS nms;
 
-    final HashMap<UUID, ArmorStand> carryingArmorStand = new HashMap<>();
-    final HashMap<UUID, ItemStack[]> savedInventories = new HashMap<>();
+    public final HashMap<UUID, ArmorStand> carryingArmorStand = new HashMap<>();
+    public final HashMap<UUID, ItemStack[]> savedInventories = new HashMap<>();
 
-    static Main plugin;
+    public static Main plugin;
 
     @Override
     public void onLoad() {
@@ -94,7 +96,7 @@ public class Main extends JavaPlugin {
             return false;
         }
         try {
-            if (NMS.class.isAssignableFrom(Class.forName("com.gmail.St3venAU.plugins.ArmorStandTools.NMS_" + nmsVersion))) {
+            if (NMS.class.isAssignableFrom(Class.forName("com.gmail.St3venAU.plugins.ArmorStandTools.nms.NMS_" + nmsVersion))) {
                 usingVersion = nmsVersion;
                 getLogger().info("Loading support for " + usingVersion);
             } else {
@@ -106,7 +108,7 @@ public class Main extends JavaPlugin {
             getLogger().warning("Support for " + nmsVersion + " not found, trying " + usingVersion + ". Please check for possible updates to the plugin.");
         }
         try {
-            nms = (NMS) Class.forName("com.gmail.St3venAU.plugins.ArmorStandTools.NMS_" + usingVersion).getConstructor(String.class).newInstance(nmsVersion);
+            nms = (NMS) Class.forName("com.gmail.St3venAU.plugins.ArmorStandTools.nms.NMS_" + usingVersion).getConstructor(String.class).newInstance(nmsVersion);
         } catch (Exception e) {
             e.printStackTrace();
             getLogger().warning("An error occurred while attempting to load support for this version of Craftbukkit/Spigot. Loading plugin failed.");
@@ -227,7 +229,7 @@ public class Main extends JavaPlugin {
         return (tool == null || (tool.isEnabled() && Utils.hasPermissionNode(p, tool.getPermission()))) && checkBlockPermission(p, b);
     }
 
-    void debug(String msg) {
+    public void debug(String msg) {
         if (Config.debug) {
             getLogger().log(Level.INFO, "[DEBUG] " + msg);
         }

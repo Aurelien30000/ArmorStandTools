@@ -6,7 +6,7 @@
 
     <groupId>groupId</groupId>
     <artifactId>ArmorStandTools</artifactId>
-    <version>3.6.3</version>
+    <version>3.6.4</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -52,6 +52,10 @@
             <id>chestshop-repo</id>
             <url>https://repo.minebench.de/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -90,6 +94,11 @@
             <artifactId>chestshop</artifactId>
             <version>3.11</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.brcdev-minecraft</groupId>
+            <artifactId>shopgui-api</artifactId>
+            <version>2.1.0</version>
         </dependency>
     </dependencies>
 

@@ -10,7 +10,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.ArrayList;
 import java.util.List;
 
-class ArmorStandCmd {
+public class ArmorStandCmd {
 
     private final ArmorStand armorStand;
     private String command;
@@ -22,7 +22,7 @@ class ArmorStandCmd {
         this.console = console;
     }
 
-    ArmorStandCmd(ArmorStand as) {
+    public ArmorStandCmd(ArmorStand as) {
         this.armorStand = as;
         this.command = null;
         for (String tag : armorStand.getScoreboardTags()) {
@@ -55,7 +55,7 @@ class ArmorStandCmd {
         return "ast-cmd-" + (console ? "con" : "plr") + ":" + command;
     }
 
-    String getCommand() {
+    public String getCommand() {
         return this.command;
     }
 
@@ -87,7 +87,7 @@ class ArmorStandCmd {
         return command.length() != 0 && armorStand.addScoreboardTag(getTag());
     }
 
-    void cloneTo(ArmorStand clone) {
+    public void cloneTo(ArmorStand clone) {
         if (command == null) return;
         ArmorStandCmd asCmd = new ArmorStandCmd(clone, command, console);
         asCmd.save();

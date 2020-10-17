@@ -1,5 +1,6 @@
-package com.gmail.St3venAU.plugins.ArmorStandTools;
+package com.gmail.St3venAU.plugins.ArmorStandTools.hooks;
 
+import com.gmail.St3venAU.plugins.ArmorStandTools.Main;
 import com.plotsquared.bukkit.util.BukkitUtil;
 import com.plotsquared.core.api.PlotAPI;
 import com.plotsquared.core.player.PlotPlayer;
@@ -10,13 +11,13 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-class PlotSquaredHook {
+public class PlotSquaredHook extends Hook {
 
     public static PlotAPI api;
     private static Main plugin;
 
     public PlotSquaredHook(Main main) {
-        PlotSquaredHook.api = new PlotAPI();
+        super(main, "PlotSquared");
         plugin = main;
     }
 
@@ -43,4 +44,10 @@ class PlotSquaredHook {
         plugin.debug("plots.admin.build.other: " + pp.hasPermission("plots.admin.build.other"));
         return plot.isAdded(uuid) || pp.hasPermission("plots.admin.build.other");
     }
+
+    @Override
+    public void register() {
+        PlotSquaredHook.api = new PlotAPI();
+    }
+
 }
