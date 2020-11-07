@@ -293,7 +293,8 @@ public class MainListener implements Listener {
     @EventHandler
     public void onPlayerDropItem(final PlayerDropItemEvent event) {
         if (ArmorStandTool.isTool(event.getItemDrop().getItemStack())) {
-            event.getItemDrop().remove();
+            event.setCancelled(true);
+            Utils.cycleInventory(event.getPlayer());
         }
     }
 
