@@ -294,7 +294,7 @@ public class MainListener implements Listener {
     public void onPlayerDropItem(final PlayerDropItemEvent event) {
         if (ArmorStandTool.isTool(event.getItemDrop().getItemStack())) {
             event.setCancelled(true);
-            Utils.cycleInventory(event.getPlayer());
+            Bukkit.getScheduler().runTaskLater(plugin, () -> Utils.cycleInventory(event.getPlayer()), 1L);
         }
     }
 
