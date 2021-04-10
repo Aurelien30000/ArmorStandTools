@@ -60,15 +60,14 @@ public class Utils {
     }
 
     public static Location getLocationFacing(Location loc) {
-        Location l = loc.clone();
-        Vector v = l.getDirection();
+        final Location l = loc.clone();
+        final Vector v = l.getDirection();
         v.setY(0);
         v.multiply(3);
         l.add(v);
         l.setYaw(l.getYaw() + 180);
-        int n;
         boolean ok = false;
-        for (n = 0; n < 5; n++) {
+        for (int n = 0; n < 5; n++) {
             if (l.getBlock().getType().isSolid()) {
                 l.add(0, 1, 0);
             } else {
@@ -83,10 +82,9 @@ public class Utils {
     }
 
     public static void cycleInventory(Player p) {
-        Inventory i = p.getInventory();
-        ItemStack temp;
+        final Inventory i = p.getInventory();
         for (int n = 0; n < 9; n++) {
-            temp = i.getItem(n);
+            final ItemStack temp = i.getItem(n);
             i.setItem(n, i.getItem(27 + n));
             i.setItem(27 + n, i.getItem(18 + n));
             i.setItem(18 + n, i.getItem(9 + n));
@@ -117,14 +115,14 @@ public class Utils {
     }
 
     public static ItemStack setLore(ItemStack is, String... lore) {
-        ItemMeta meta = is.getItemMeta();
+        final ItemMeta meta = is.getItemMeta();
         meta.setLore(Arrays.asList(lore));
         is.setItemMeta(meta);
         return is;
     }
 
     public static boolean toggleInvulnerability(ArmorStand as) {
-        boolean inv = !as.isInvulnerable();
+        final boolean inv = !as.isInvulnerable();
         as.setInvulnerable(inv);
         return inv;
     }

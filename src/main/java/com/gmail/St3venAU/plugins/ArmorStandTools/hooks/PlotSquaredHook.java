@@ -26,20 +26,20 @@ public class PlotSquaredHook extends Hook {
     }
 
     public static boolean checkPermission(Player player, Location location) {
-        com.plotsquared.core.location.Location plotLocation = BukkitUtil.getLocation(location);
-        PlotArea plotArea = plotLocation.getPlotArea();
+        final com.plotsquared.core.location.Location plotLocation = BukkitUtil.getLocation(location);
+        final PlotArea plotArea = plotLocation.getPlotArea();
         if (plotArea == null) {
             plugin.debug("plots.admin.build.road: " + player.hasPermission("plots.admin.build.road"));
             return player.hasPermission("plots.admin.build.road");
         }
-        Plot plot = plotArea.getPlot(plotLocation);
-        PlotPlayer<?> pp = PlotPlayer.wrap(player);
+        final Plot plot = plotArea.getPlot(plotLocation);
+        final PlotPlayer<?> pp = PlotPlayer.wrap(player);
         plugin.debug("Plot: " + plot);
         if (plot == null) {
             plugin.debug("plots.admin.build.road: " + pp.hasPermission("plots.admin.build.road"));
             return pp.hasPermission("plots.admin.build.road");
         }
-        UUID uuid = pp.getUUID();
+        final UUID uuid = pp.getUUID();
         plugin.debug("plot.isAdded: " + plot.isAdded(uuid));
         plugin.debug("plots.admin.build.other: " + pp.hasPermission("plots.admin.build.other"));
         return plot.isAdded(uuid) || pp.hasPermission("plots.admin.build.other");

@@ -66,7 +66,7 @@ public class ArmorStandCmd {
             return true;
         }
         setOnCooldown();
-        String cmd = command.contains("%player%") ? command.replaceAll("%player%", p.getName()) : command;
+        final String cmd = command.contains("%player%") ? command.replaceAll("%player%", p.getName()) : command;
         if (console) {
             return Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
         } else {
@@ -89,7 +89,7 @@ public class ArmorStandCmd {
 
     public void cloneTo(ArmorStand clone) {
         if (command == null) return;
-        ArmorStandCmd asCmd = new ArmorStandCmd(clone, command, console);
+        final ArmorStandCmd asCmd = new ArmorStandCmd(clone, command, console);
         asCmd.save();
     }
 
@@ -98,7 +98,7 @@ public class ArmorStandCmd {
     }
 
     static boolean removeAssignedCommand(ArmorStand as) {
-        List<String> tags = new ArrayList<>();
+        final List<String> tags = new ArrayList<>();
         for (String tag : as.getScoreboardTags()) {
             if (tag.startsWith("ast-cmd-")) {
                 tags.add(tag);
@@ -132,7 +132,7 @@ public class ArmorStandCmd {
     // Positive cooldown: Set cooldown time, Negative cooldown: Remove cooldown time
     void setCooldownTime(int cooldown) {
         if (armorStand == null) return;
-        List<String> tags = new ArrayList<>();
+        final List<String> tags = new ArrayList<>();
         for (String tag : armorStand.getScoreboardTags()) {
             if (tag.startsWith("ast-cdn-")) {
                 tags.add(tag);
@@ -149,7 +149,7 @@ public class ArmorStandCmd {
         if (armorStand == null) return -1;
         for (String tag : armorStand.getScoreboardTags()) {
             if (tag.startsWith("ast-cdn-")) {
-                String[] split = tag.split("ast-cdn-");
+                final String[] split = tag.split("ast-cdn-");
                 if (split.length < 2 || split[1].length() < 1) return -1;
                 try {
                     return Integer.parseInt(split[1]);

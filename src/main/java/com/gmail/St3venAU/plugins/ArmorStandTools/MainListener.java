@@ -1,5 +1,6 @@
 package com.gmail.St3venAU.plugins.ArmorStandTools;
 
+import com.destroystokyo.paper.event.player.PlayerAdvancementCriterionGrantEvent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
@@ -18,7 +19,8 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.*;
-import org.bukkit.inventory.CraftingInventory;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -186,9 +188,9 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
-        Player p = event.getPlayer();
-        if (plugin.carryingArmorStand.containsKey(p.getUniqueId())) {
-            ArmorStand as = plugin.carryingArmorStand.get(p.getUniqueId());
+        final Player p = event.getPlayer();
+        final ArmorStand as = plugin.carryingArmorStand.get(p.getUniqueId());
+        if (as != null) {
             if (as == null || as.isDead()) {
                 plugin.carryingArmorStand.remove(p.getUniqueId());
                 Utils.actionBarMsg(p, Config.asDropped);
@@ -248,11 +250,10 @@ public class MainListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onCraftItem(CraftItemEvent event) {
-        if (event.isCancelled()) return;
         final Player p = (Player) event.getWhoClicked();
-        CraftingInventory inventory = event.getInventory();
+        final Inventory inventory = event.getInventory();
         for (ItemStack is : inventory.getContents()) {
             if (ArmorStandTool.isTool(is)) {
                 event.setCancelled(true);
@@ -262,11 +263,11 @@ public class MainListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.isCancelled() || !(event.getWhoClicked() instanceof Player)) return;
+        if (!(event.getWhoClicked() instanceof Player)) return;
         final Player p = (Player) event.getWhoClicked();
-        ItemStack item = event.getCurrentItem();
+        final ItemStack item = event.getCurrentItem();
         if (event.getInventory().getHolder() != p && ArmorStandTool.isTool(item)) {
             event.setCancelled(true);
             p.updateInventory();
@@ -280,9 +281,9 @@ public class MainListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onInventoryDrag(InventoryDragEvent event) {
-        if (event.isCancelled() || !(event.getWhoClicked() instanceof Player)) return;
+        if (!(event.getWhoClicked() instanceof Player)) return;
         final Player p = (Player) event.getWhoClicked();
         if (event.getInventory().getHolder() != p && Utils.containsItems(event.getNewItems().values())) {
             event.setCancelled(true);
@@ -300,9 +301,10 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        UUID uuid = event.getPlayer().getUniqueId();
-        if (plugin.carryingArmorStand.containsKey(uuid)) {
-            plugin.returnArmorStand(plugin.carryingArmorStand.get(uuid));
+        final UUID uuid = event.getPlayer().getUniqueId();
+        final ArmorStand as = plugin.carryingArmorStand.get(uuid);
+        if (as != null) {
+            plugin.returnArmorStand(as);
             plugin.carryingArmorStand.remove(uuid);
         }
         if (plugin.savedInventories.containsKey(uuid)) {
@@ -313,8 +315,9 @@ public class MainListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         final Player p = event.getPlayer();
-        if (plugin.carryingArmorStand.containsKey(p.getUniqueId())) {
-            if (plugin.playerHasPermission(p, plugin.carryingArmorStand.get(p.getUniqueId()).getLocation().getBlock(), null)) {
+        final ArmorStand as = plugin.carryingArmorStand.get(p.getUniqueId());
+        if (as != null) {
+            if (plugin.playerHasPermission(p, as.getLocation().getBlock(), null)) {
                 plugin.carryingArmorStand.remove(p.getUniqueId());
                 Utils.actionBarMsg(p, Config.asDropped);
                 p.setMetadata("lastDrop", new FixedMetadataValue(plugin, System.currentTimeMillis()));
@@ -324,10 +327,10 @@ public class MainListener implements Listener {
             }
             return;
         }
-        ArmorStandTool tool = ArmorStandTool.get(event.getItem());
+        final ArmorStandTool tool = ArmorStandTool.get(event.getItem());
         if (tool == null) return;
         event.setCancelled(true);
-        Action action = event.getAction();
+        final Action action = event.getAction();
         if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK) {
             Utils.cycleInventory(p);
         } else if ((action == Action.RIGHT_CLICK_BLOCK || action == Action.RIGHT_CLICK_AIR) && tool == ArmorStandTool.SUMMON) {
@@ -335,7 +338,7 @@ public class MainListener implements Listener {
                 p.sendMessage(ChatColor.RED + Config.generalNoPerm);
                 return;
             }
-            Location l = Utils.getLocationFacing(p.getLocation());
+            final Location l = Utils.getLocationFacing(p.getLocation());
             plugin.pickUpArmorStand(spawnArmorStand(l), p, true);
             Utils.actionBarMsg(p, Config.carrying);
         }
@@ -350,7 +353,7 @@ public class MainListener implements Listener {
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
         if (event.getEntity() instanceof ArmorStand) {
-            ArmorStand as = (ArmorStand) event.getEntity();
+            final ArmorStand as = (ArmorStand) event.getEntity();
 
             if (ArmorStandGUI.isInUse(as) || as.isInvulnerable()) {
                 event.setCancelled(true);
@@ -367,7 +370,7 @@ public class MainListener implements Listener {
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof ArmorStand) {
-            ArmorStand as = (ArmorStand) event.getEntity();
+            final ArmorStand as = (ArmorStand) event.getEntity();
             if (ArmorStandGUI.isInUse(as) || as.isInvulnerable()) {
                 event.setCancelled(true);
             }
@@ -384,7 +387,7 @@ public class MainListener implements Listener {
     }
 
     private ArmorStand spawnArmorStand(Location l) {
-        ArmorStand as = (ArmorStand) l.getWorld().spawnEntity(l, EntityType.ARMOR_STAND);
+        final ArmorStand as = (ArmorStand) l.getWorld().spawnEntity(l, EntityType.ARMOR_STAND);
         as.setHelmet(Config.helmet);
         as.setChestplate(Config.chest);
         as.setLeggings(Config.pants);
@@ -407,7 +410,7 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        Block b = event.getBlock();
+        final Block b = event.getBlock();
         if ((b.getType() == Material.PLAYER_HEAD && b.hasMetadata("protected")) || (b.getType().toString().endsWith("_SIGN") && b.hasMetadata("armorStand"))) {
             event.setCancelled(true);
         }
@@ -419,13 +422,13 @@ public class MainListener implements Listener {
             final Block b = event.getBlock();
             final ArmorStand as = getArmorStand(b);
             if (as != null) {
-                StringBuilder sb = new StringBuilder();
+                final StringBuilder sb = new StringBuilder();
                 for (String line : event.getLines()) {
                     if (line != null && line.length() > 0) {
                         sb.append(ChatColor.translateAlternateColorCodes('&', line));
                     }
                 }
-                String input = sb.toString();
+                final String input = sb.toString();
                 if (b.hasMetadata("setName")) {
                     if (input.length() > 0) {
                         as.setCustomName(input);
@@ -439,17 +442,17 @@ public class MainListener implements Listener {
                     if (MC_USERNAME_PATTERN.matcher(input).matches()) {
                         b.setMetadata("protected", new FixedMetadataValue(plugin, true));
                         event.getPlayer().sendMessage(ChatColor.GOLD + Config.pleaseWait);
-                        String cmd = "minecraft:give " + event.getPlayer().getName() + " minecraft:player_head{SkullOwner:\"" + input + "\"} 1";
-                        String current = b.getWorld().getGameRuleValue("sendCommandFeedback");
+                        final String cmd = "minecraft:give " + event.getPlayer().getName() + " minecraft:player_head{SkullOwner:\"" + input + "\"} 1";
+                        final String current = b.getWorld().getGameRuleValue("sendCommandFeedback");
                         b.getWorld().setGameRuleValue("sendCommandFeedback", "false");
                         Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd);
                         b.getWorld().setGameRuleValue("sendCommandFeedback", current);
                         boolean found = false;
                         for (int slot : event.getPlayer().getInventory().all(Material.PLAYER_HEAD).keySet()) {
-                            ItemStack skull = event.getPlayer().getInventory().getItem(slot);
-                            SkullMeta sm = (SkullMeta) skull.getItemMeta();
+                            final ItemStack skull = event.getPlayer().getInventory().getItem(slot);
+                            final SkullMeta sm = (SkullMeta) skull.getItemMeta();
                             if (sm.hasOwner() && input.equalsIgnoreCase(sm.getOwningPlayer().getName())) {
-                                as.setHelmet(skull);
+                                as.setItem(EquipmentSlot.HEAD, skull);
                                 event.getPlayer().sendMessage(ChatColor.GREEN + Config.appliedHead + ChatColor.GOLD + " " + input);
                                 event.getPlayer().getInventory().setItem(slot, null);
                                 found = true;
@@ -474,7 +477,7 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onPlayerCommand(final PlayerCommandPreprocessEvent event) {
-        Player p = event.getPlayer();
+        final Player p = event.getPlayer();
         String cmd = event.getMessage().split(" ")[0].toLowerCase();
         while (cmd.length() > 0 && cmd.charAt(0) == '/') {
             cmd = cmd.substring(1);
@@ -494,13 +497,20 @@ public class MainListener implements Listener {
         }
         b.removeMetadata("armorStand", plugin);
         if (uuid != null) {
-            for (org.bukkit.entity.Entity e : b.getWorld().getEntities()) {
+            for (Entity e : b.getWorld().getEntities()) {
                 if (e instanceof ArmorStand && e.getUniqueId().equals(uuid)) {
                     return (ArmorStand) e;
                 }
             }
         }
         return null;
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerAdvancementCriterionGrantEvent(PlayerAdvancementCriterionGrantEvent event) {
+        if (plugin.savedInventories.containsKey(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
     }
 
     // Give all permissions to all players - for testing only

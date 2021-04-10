@@ -28,8 +28,8 @@ class Commands implements CommandExecutor, TabCompleter {
             plugin.getLogger().warning(Config.notConsole);
             return false;
         }
-        String cmd = command.getName().toLowerCase();
-        Player p = (Player) sender;
+        final String cmd = command.getName().toLowerCase();
+        final Player p = (Player) sender;
         if (cmd.equals("astools") || cmd.equals("ast")) {
             if (!Utils.hasPermissionNode(p, "astools.command")) {
                 p.sendMessage(ChatColor.RED + Config.noCommandPerm);
@@ -57,7 +57,7 @@ class Commands implements CommandExecutor, TabCompleter {
                 return true;
             }
         } else if (cmd.equals("ascmd")) {
-            ArmorStand as = getNearbyArmorStand(p);
+            final ArmorStand as = getNearbyArmorStand(p);
             if (as == null) {
                 p.sendMessage("\n" + Config.noASNearBy);
                 return true;
@@ -72,7 +72,7 @@ class Commands implements CommandExecutor, TabCompleter {
                     p.sendMessage(ChatColor.RED + Config.noCommandPerm);
                     return true;
                 }
-                ArmorStandCmd asCmd = new ArmorStandCmd(as);
+                final ArmorStandCmd asCmd = new ArmorStandCmd(as);
                 if (asCmd.getCommand() == null) {
                     p.sendMessage("\n" + Config.closestAS + name + Config.hasNoCmd);
                 } else {
@@ -117,12 +117,12 @@ class Commands implements CommandExecutor, TabCompleter {
                     ascmdHelp(p);
                     return true;
                 }
-                StringBuilder sb = new StringBuilder();
+                final StringBuilder sb = new StringBuilder();
                 for (int i = 2; i < args.length; i++) {
                     sb.append(args[i]).append(" ");
                 }
                 int startAt = sb.charAt(0) == '/' ? 1 : 0;
-                String c = sb.toString().substring(startAt, sb.length() - 1);
+                final String c = sb.substring(startAt, sb.length() - 1);
                 if (c.length() == 0) {
                     ascmdHelp(p);
                     return true;
@@ -140,7 +140,7 @@ class Commands implements CommandExecutor, TabCompleter {
                     p.sendMessage(ChatColor.RED + Config.noCommandPerm);
                     return true;
                 }
-                ArmorStandCmd asCmd = new ArmorStandCmd(as);
+                final ArmorStandCmd asCmd = new ArmorStandCmd(as);
                 if (asCmd.getCommand() == null) {
                     p.sendMessage(Config.closestAS + name + Config.hasNoCmd);
                     return true;
@@ -149,7 +149,7 @@ class Commands implements CommandExecutor, TabCompleter {
                     asCmd.setCooldownTime(-1);
                     p.sendMessage(Config.cooldownRemovedFrom + " " + Config.closestAS + name);
                 } else {
-                    int ticks;
+                    final int ticks;
                     try {
                         ticks = Integer.parseInt(args[1]);
                     } catch (NumberFormatException e) {
@@ -199,8 +199,8 @@ class Commands implements CommandExecutor, TabCompleter {
     }
 
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        List<String> list = new ArrayList<>();
-        String cmd = command.getName().toLowerCase();
+        final List<String> list = new ArrayList<>();
+        final String cmd = command.getName().toLowerCase();
         String typed = "";
         if (args.length > 0) {
             typed = args[args.length - 1].toLowerCase();
@@ -227,4 +227,5 @@ class Commands implements CommandExecutor, TabCompleter {
         }
         return list;
     }
+
 }

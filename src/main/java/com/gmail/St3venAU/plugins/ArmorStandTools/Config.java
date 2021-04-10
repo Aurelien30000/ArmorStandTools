@@ -137,7 +137,7 @@ class Config {
     private static void reloadMainConfig() {
         plugin.saveDefaultConfig();
         plugin.reloadConfig();
-        FileConfiguration config = plugin.getConfig();
+        final FileConfiguration config = plugin.getConfig();
         helmet = toItemStack(config.getString("helmet"));
         chest = toItemStack(config.getString("chest"));
         pants = toItemStack(config.getString("pants"));
@@ -175,7 +175,7 @@ class Config {
             tool.setEnabled(config);
         }
 
-        Plugin wgp = plugin.getServer().getPluginManager().getPlugin("WorldGuard");
+        final Plugin wgp = plugin.getServer().getPluginManager().getPlugin("WorldGuard");
         if (wgp instanceof WorldGuardPlugin) {
             worldGuardPlugin = (WorldGuardPlugin) wgp;
         }
@@ -194,7 +194,7 @@ class Config {
     private static void reloadLanguageConfig() {
         languageConfigFile = new File(plugin.getDataFolder(), "language.yml");
         languageConfig = YamlConfiguration.loadConfiguration(languageConfigFile);
-        InputStream defConfigStream = plugin.getResource("language.yml");
+        final InputStream defConfigStream = plugin.getResource("language.yml");
         if (defConfigStream != null) {
             languageConfig.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defConfigStream, StandardCharsets.UTF_8)));
         }
@@ -211,7 +211,7 @@ class Config {
         if (s == null || s.length() == 0) {
             return new ItemStack(Material.AIR);
         }
-        String[] split = s.split(" ");
+        final String[] split = s.split(" ");
         if (split.length > 2) {
             plugin.getLogger().warning("Error in config.yml: Must use the format: MATERIAL_NAME dataValue. Continuing using AIR instead.");
             return new ItemStack(Material.AIR);
@@ -224,7 +224,7 @@ class Config {
                 plugin.getLogger().warning("Error in config.yml: Invalid data value specifed. Continuing using data value 0 instead.");
             }
         }
-        Material m;
+        final Material m;
         try {
             m = Material.valueOf(split[0].toUpperCase());
         } catch (IllegalArgumentException iae) {

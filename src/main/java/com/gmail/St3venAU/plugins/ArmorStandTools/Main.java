@@ -14,13 +14,14 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -43,9 +44,9 @@ public class Main extends JavaPlugin {
             try {
                 // Need to do this with reflection for some reason, otherwise plugin load fails when worldguard is not present, even though this code block is not actually executed unless worldguard is present ???
                 WG_AST_FLAG = Class.forName("com.sk89q.worldguard.protection.flags.StateFlag").getConstructor(String.class, boolean.class).newInstance("ast", true);
-                Class<?> worldGuardClass = Class.forName("com.sk89q.worldguard.WorldGuard");
-                Object worldGuard = worldGuardClass.getMethod("getInstance").invoke(worldGuardClass);
-                Object flagRegistry = worldGuardClass.getMethod("getFlagRegistry").invoke(worldGuard);
+                final Class<?> worldGuardClass = Class.forName("com.sk89q.worldguard.WorldGuard");
+                final Object worldGuard = worldGuardClass.getMethod("getInstance").invoke(worldGuardClass);
+                final Object flagRegistry = worldGuardClass.getMethod("getFlagRegistry").invoke(worldGuard);
                 flagRegistry.getClass().getMethod("register", Class.forName("com.sk89q.worldguard.protection.flags.Flag")).invoke(flagRegistry, WG_AST_FLAG);
                 getLogger().info("Registered custom WorldGuard flag: ast");
             } catch (Exception e) {
@@ -62,7 +63,7 @@ public class Main extends JavaPlugin {
             return;
         }
         getServer().getPluginManager().registerEvents(new MainListener(this), this);
-        Commands cmds = new Commands(this);
+        final Commands cmds = new Commands(this);
         getCommand("astools").setExecutor(cmds);
         getCommand("ascmd").setExecutor(cmds);
         getCommand("ascmd").setTabCompleter(cmds);
@@ -86,7 +87,7 @@ public class Main extends JavaPlugin {
     }
 
     private boolean loadSpigotVersionSupport() {
-        String nmsVersion = getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
+        final String nmsVersion = getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
         String usingVersion;
         if (nmsVersion.startsWith("v1_4") || nmsVersion.startsWith("v1_5") || nmsVersion.startsWith("v1_6") ||
                 nmsVersion.startsWith("v1_7") || nmsVersion.startsWith("v1_8") || nmsVersion.startsWith("v1_9") ||
@@ -131,30 +132,29 @@ public class Main extends JavaPlugin {
     }
 
     private void removeAllTools(Player p) {
-        PlayerInventory i = p.getInventory();
+        final Inventory i = p.getInventory();
         for (ArmorStandTool t : ArmorStandTool.values()) {
             i.remove(t.getItem());
         }
     }
 
     void saveInventoryAndClear(Player p) {
-        ItemStack[] inv = p.getInventory().getContents().clone();
+        final ItemStack[] inv = p.getInventory().getContents().clone();
         savedInventories.put(p.getUniqueId(), inv);
         p.getInventory().clear();
     }
 
     void restoreInventory(Player p) {
         removeAllTools(p);
-        UUID uuid = p.getUniqueId();
-        ItemStack[] savedInv = savedInventories.get(uuid);
+        final UUID uuid = p.getUniqueId();
+        final ItemStack[] savedInv = savedInventories.remove(uuid);
         if (savedInv == null) return;
-        PlayerInventory plrInv = p.getInventory();
-        ItemStack[] newItems = plrInv.getContents().clone();
+        final Inventory plrInv = p.getInventory();
+        final ItemStack[] newItems = plrInv.getContents().clone();
         plrInv.setContents(savedInv);
-        savedInventories.remove(uuid);
         for (ItemStack i : newItems) {
             if (i == null) continue;
-            HashMap<Integer, ItemStack> couldntFit = plrInv.addItem(i);
+            final Map<Integer, ItemStack> couldntFit = plrInv.addItem(i);
             for (ItemStack is : couldntFit.values()) {
                 p.getWorld().dropItem(p.getLocation(), is);
             }
@@ -169,7 +169,7 @@ public class Main extends JavaPlugin {
     }
 
     void setName(Player p, ArmorStand as) {
-        Block b = Utils.findAnAirBlock(p.getLocation());
+        final Block b = Utils.findAnAirBlock(p.getLocation());
         if (b == null) {
             p.sendMessage(ChatColor.RED + Config.noAirError);
             return;
@@ -181,7 +181,7 @@ public class Main extends JavaPlugin {
     }
 
     void setPlayerSkull(Player p, ArmorStand as) {
-        Block b = Utils.findAnAirBlock(p.getLocation());
+        final Block b = Utils.findAnAirBlock(p.getLocation());
         if (b == null) {
             p.sendMessage(ChatColor.RED + Config.noAirError);
             return;
@@ -196,7 +196,7 @@ public class Main extends JavaPlugin {
         if (b == null) return true;
         debug("PlotSquaredHook.api: " + PlotSquaredHook.api);
         if (PlotSquaredHook.api != null) {
-            Location l = b.getLocation();
+            final Location l = b.getLocation();
             debug("PlotSquaredHook.isPlotWorld(l): " + PlotSquaredHook.isPlotWorld(l));
             if (PlotSquaredHook.isPlotWorld(l)) {
                 return PlotSquaredHook.checkPermission(p, l);
@@ -209,13 +209,13 @@ public class Main extends JavaPlugin {
             }
             return Config.worldGuardPlugin.createProtectionQuery().testBlockBreak(p, b);
         }
-        BlockBreakEvent breakEvent = new BlockBreakEvent(b, p);
+        final BlockBreakEvent breakEvent = new BlockBreakEvent(b, p);
         Bukkit.getServer().getPluginManager().callEvent(breakEvent);
         return !breakEvent.isCancelled();
     }
 
     private boolean getWorldGuardAstFlag(Location l) {
-        RegionManager regions = WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(l.getWorld()));
+        final RegionManager regions = WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(l.getWorld()));
         if (regions == null) return true;
         return regions.getApplicableRegions(BukkitAdapter.asBlockVector(l)).testState(null, (StateFlag) WG_AST_FLAG);
     }
@@ -234,4 +234,5 @@ public class Main extends JavaPlugin {
             getLogger().log(Level.INFO, "[DEBUG] " + msg);
         }
     }
+
 }

@@ -13,6 +13,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -39,7 +40,7 @@ class ArmorStandGUI implements Listener {
         }
         if (filler == null) {
             filler = new ItemStack(Material.BLACK_STAINED_GLASS_PANE, 1);
-            ItemMeta im = filler.getItemMeta();
+            final ItemMeta im = filler.getItemMeta();
             im.setDisplayName(" ");
             filler.setItemMeta(im);
             invSlots.add(10);
@@ -67,12 +68,12 @@ class ArmorStandGUI implements Listener {
                 i.setItem(tool.getSlot(), updateLore(tool));
             }
         }
-        i.setItem(10, as.getEquipment().getItemInMainHand());
-        i.setItem(12, as.getEquipment().getItemInOffHand());
-        i.setItem(2, as.getHelmet());
-        i.setItem(11, as.getChestplate());
-        i.setItem(20, as.getLeggings());
-        i.setItem(29, as.getBoots());
+        i.setItem(10, as.getItem(EquipmentSlot.HAND));
+        i.setItem(12, as.getItem(EquipmentSlot.OFF_HAND));
+        i.setItem(2, as.getItem(EquipmentSlot.HEAD));
+        i.setItem(11, as.getItem(EquipmentSlot.CHEST));
+        i.setItem(20, as.getItem(EquipmentSlot.LEGS));
+        i.setItem(29, as.getItem(EquipmentSlot.FEET));
         inUse.add(as.getEntityId());
         p.openInventory(i);
     }
@@ -82,7 +83,7 @@ class ArmorStandGUI implements Listener {
     }
 
     private ItemStack updateLore(ArmorStandTool tool) {
-        ItemStack item = tool.getItem();
+        final ItemStack item = tool.getItem();
         switch (tool) {
             case INVIS:
                 return Utils.setLore(item, ChatColor.AQUA + Config.asVisible + ": " + (as.isVisible() ? (ChatColor.GREEN + Config.isTrue) : (ChatColor.RED + Config.isFalse)));
@@ -111,9 +112,9 @@ class ArmorStandGUI implements Listener {
     }
 
     private String plrHeadName(ArmorStand as) {
-        if (as.getHelmet() == null) return null;
-        if (!(as.getHelmet().getItemMeta() instanceof SkullMeta)) return null;
-        SkullMeta meta = (SkullMeta) as.getHelmet().getItemMeta();
+        if (as.getItem(EquipmentSlot.HEAD).getType() == Material.AIR) return null;
+        if (!(as.getItem(EquipmentSlot.HEAD).getItemMeta() instanceof SkullMeta)) return null;
+        final SkullMeta meta = (SkullMeta) as.getItem(EquipmentSlot.HEAD).getItemMeta();
         if (!meta.hasOwner()) return null;
         return meta.getOwningPlayer().getName();
     }
@@ -128,12 +129,12 @@ class ArmorStandGUI implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!event.getInventory().equals(i)) return;
-        Player p = (Player) event.getWhoClicked();
+        final Player p = (Player) event.getWhoClicked();
         if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT || event.getClick() == ClickType.NUMBER_KEY) {
             event.setCancelled(true);
             return;
         }
-        int slot = event.getRawSlot();
+        final int slot = event.getRawSlot();
         if (slot > i.getSize()) return;
         if (invSlots.contains(slot)) {
             if (plugin.checkBlockPermission(p, as.getLocation().getBlock())) {
@@ -146,7 +147,7 @@ class ArmorStandGUI implements Listener {
         }
         event.setCancelled(true);
         if (!(event.getWhoClicked() instanceof Player)) return;
-        ArmorStandTool t = ArmorStandTool.get(event.getCurrentItem());
+        final ArmorStandTool t = ArmorStandTool.get(event.getCurrentItem());
         if (t == null) return;
         if (!plugin.playerHasPermission(p, as.getLocation().getBlock(), t)) {
             p.sendMessage(ChatColor.RED + Config.generalNoPerm);
@@ -202,7 +203,7 @@ class ArmorStandGUI implements Listener {
                 break;
             case MOVE:
                 p.closeInventory();
-                UUID uuid = p.getUniqueId();
+                final UUID uuid = p.getUniqueId();
                 if (plugin.carryingArmorStand.containsKey(uuid)) {
                     plugin.carryingArmorStand.remove(uuid);
                     Utils.actionBarMsg(p, Config.asDropped);
@@ -223,7 +224,7 @@ class ArmorStandGUI implements Listener {
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
         if (!event.getInventory().equals(i) || !(event.getWhoClicked() instanceof Player)) return;
-        Player p = (Player) event.getWhoClicked();
+        final Player p = (Player) event.getWhoClicked();
         boolean invModified = false;
         for (int slot : event.getRawSlots()) {
             if (slot < i.getSize()) {
@@ -250,12 +251,12 @@ class ArmorStandGUI implements Listener {
             @Override
             public void run() {
                 if (as == null || i == null) return;
-                as.getEquipment().setItemInMainHand(i.getItem(10));
-                as.getEquipment().setItemInOffHand(i.getItem(12));
-                as.setHelmet(i.getItem(2));
-                as.setChestplate(i.getItem(11));
-                as.setLeggings(i.getItem(20));
-                as.setBoots(i.getItem(29));
+                as.setItem(EquipmentSlot.HAND, i.getItem(10));
+                as.setItem(EquipmentSlot.OFF_HAND, i.getItem(12));
+                as.setItem(EquipmentSlot.HEAD, i.getItem(2));
+                as.setItem(EquipmentSlot.CHEST, i.getItem(11));
+                as.setItem(EquipmentSlot.LEGS, i.getItem(20));
+                as.setItem(EquipmentSlot.FEET, i.getItem(29));
             }
         }.runTaskLater(plugin, 1L);
     }
