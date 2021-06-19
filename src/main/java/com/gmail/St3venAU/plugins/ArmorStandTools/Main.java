@@ -27,7 +27,7 @@ import java.util.logging.Level;
 
 public class Main extends JavaPlugin {
 
-    private static final String LATEST_VERSION = "v1_16_R3";
+    private static final String LATEST_VERSION = "v1_17_R1";
 
     private static Object WG_AST_FLAG;
 
@@ -89,11 +89,8 @@ public class Main extends JavaPlugin {
     private boolean loadSpigotVersionSupport() {
         final String nmsVersion = getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
         String usingVersion;
-        if (nmsVersion.startsWith("v1_4") || nmsVersion.startsWith("v1_5") || nmsVersion.startsWith("v1_6") ||
-                nmsVersion.startsWith("v1_7") || nmsVersion.startsWith("v1_8") || nmsVersion.startsWith("v1_9") ||
-                nmsVersion.startsWith("v1_10") || nmsVersion.startsWith("v1_11") || nmsVersion.startsWith("v1_12") ||
-                nmsVersion.startsWith("v1_13") || nmsVersion.startsWith("v1_14")) {
-            getLogger().warning("This Craftbukkit/Spigot version is not supported. Craftbukkit/Spigot/Paper 1.15+ required. Loading plugin failed.");
+        if (!nmsVersion.startsWith("v1_17")) {
+            getLogger().warning("This Craftbukkit/Spigot version is not supported. CraftBukkit/Spigot/Paper 1.17+ required. Loading plugin failed.");
             return false;
         }
         try {
@@ -194,7 +191,6 @@ public class Main extends JavaPlugin {
 
     boolean checkBlockPermission(Player p, Block b) {
         if (b == null) return true;
-        debug("PlotSquaredHook.api: " + PlotSquaredHook.api);
         if (PlotSquaredHook.api != null) {
             final Location l = b.getLocation();
             debug("PlotSquaredHook.isPlotWorld(l): " + PlotSquaredHook.isPlotWorld(l));

@@ -15,7 +15,8 @@ command that will re-create the armor stand at any time.
 Compatibility
 -------------
 
-- Armor Stand Tools v3.6.x - Spigot/CraftBukkit 1.15 to 1.15.2 and 1.16.3 to 1.16.4 only (use previous buils for 1.16 -
+- Armor Stand Tools v3.7.x - Spigot/CraftBukkit 1.17
+- Armor Stand Tools v3.6.x - Spigot/CraftBukkit 1.15 to 1.15.2 and 1.16.3 to 1.16.5 only (use previous buils for 1.16 -
   1.16.2)
 - Armor Stand Tools v3.x.x -> 3.5.1 - Spigot/CraftBukkit 1.13 to 1.15 only
 - Armor Stand Tools v2.4.3 - Spigot/CraftBukkit 1.8, 1.9, 1.10, 1.11,

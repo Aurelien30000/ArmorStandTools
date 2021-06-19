@@ -43,9 +43,8 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
-        if (event.getRightClicked() instanceof ArmorStand) {
+        if (event.getRightClicked() instanceof ArmorStand as) {
             Player p = event.getPlayer();
-            ArmorStand as = (ArmorStand) event.getRightClicked();
 
             if (!event.isCancelled() && ArmorStandGUI.isInUse(as)) {
                 Utils.actionBarMsg(p, Config.guiInUse);
@@ -80,79 +79,34 @@ public class MainListener implements Listener {
                 boolean cancel = true;
 
                 switch (tool) {
-                    case HEADX:
-                        as.setHeadPose(as.getHeadPose().setX(angle));
-                        break;
-                    case HEADY:
-                        as.setHeadPose(as.getHeadPose().setY(angle));
-                        break;
-                    case HEADZ:
-                        as.setHeadPose(as.getHeadPose().setZ(angle));
-                        break;
-                    case LARMX:
-                        as.setLeftArmPose(as.getLeftArmPose().setX(angle));
-                        break;
-                    case LARMY:
-                        as.setLeftArmPose(as.getLeftArmPose().setY(angle));
-                        break;
-                    case LARMZ:
-                        as.setLeftArmPose(as.getLeftArmPose().setZ(angle));
-                        break;
-                    case RARMX:
-                        as.setRightArmPose(as.getRightArmPose().setX(angle));
-                        break;
-                    case RARMY:
-                        as.setRightArmPose(as.getRightArmPose().setY(angle));
-                        break;
-                    case RARMZ:
-                        as.setRightArmPose(as.getRightArmPose().setZ(angle));
-                        break;
-                    case LLEGX:
-                        as.setLeftLegPose(as.getLeftLegPose().setX(angle));
-                        break;
-                    case LLEGY:
-                        as.setLeftLegPose(as.getLeftLegPose().setY(angle));
-                        break;
-                    case LLEGZ:
-                        as.setLeftLegPose(as.getLeftLegPose().setZ(angle));
-                        break;
-                    case RLEGX:
-                        as.setRightLegPose(as.getRightLegPose().setX(angle));
-                        break;
-                    case RLEGY:
-                        as.setRightLegPose(as.getRightLegPose().setY(angle));
-                        break;
-                    case RLEGZ:
-                        as.setRightLegPose(as.getRightLegPose().setZ(angle));
-                        break;
-                    case BODYX:
-                        as.setBodyPose(as.getBodyPose().setX(angle));
-                        break;
-                    case BODYY:
-                        as.setBodyPose(as.getBodyPose().setY(angle));
-                        break;
-                    case BODYZ:
-                        as.setBodyPose(as.getBodyPose().setZ(angle));
-                        break;
-                    case MOVEX:
-                        as.teleport(as.getLocation().add(0.05 * (p.isSneaking() ? -1 : 1), 0.0, 0.0));
-                        break;
-                    case MOVEY:
-                        as.teleport(as.getLocation().add(0.0, 0.05 * (p.isSneaking() ? -1 : 1), 0.0));
-                        break;
-                    case MOVEZ:
-                        as.teleport(as.getLocation().add(0.0, 0.0, 0.05 * (p.isSneaking() ? -1 : 1)));
-                        break;
-                    case ROTAT:
+                    case HEADX -> as.setHeadPose(as.getHeadPose().setX(angle));
+                    case HEADY -> as.setHeadPose(as.getHeadPose().setY(angle));
+                    case HEADZ -> as.setHeadPose(as.getHeadPose().setZ(angle));
+                    case LARMX -> as.setLeftArmPose(as.getLeftArmPose().setX(angle));
+                    case LARMY -> as.setLeftArmPose(as.getLeftArmPose().setY(angle));
+                    case LARMZ -> as.setLeftArmPose(as.getLeftArmPose().setZ(angle));
+                    case RARMX -> as.setRightArmPose(as.getRightArmPose().setX(angle));
+                    case RARMY -> as.setRightArmPose(as.getRightArmPose().setY(angle));
+                    case RARMZ -> as.setRightArmPose(as.getRightArmPose().setZ(angle));
+                    case LLEGX -> as.setLeftLegPose(as.getLeftLegPose().setX(angle));
+                    case LLEGY -> as.setLeftLegPose(as.getLeftLegPose().setY(angle));
+                    case LLEGZ -> as.setLeftLegPose(as.getLeftLegPose().setZ(angle));
+                    case RLEGX -> as.setRightLegPose(as.getRightLegPose().setX(angle));
+                    case RLEGY -> as.setRightLegPose(as.getRightLegPose().setY(angle));
+                    case RLEGZ -> as.setRightLegPose(as.getRightLegPose().setZ(angle));
+                    case BODYX -> as.setBodyPose(as.getBodyPose().setX(angle));
+                    case BODYY -> as.setBodyPose(as.getBodyPose().setY(angle));
+                    case BODYZ -> as.setBodyPose(as.getBodyPose().setZ(angle));
+                    case MOVEX -> as.teleport(as.getLocation().add(0.05 * (p.isSneaking() ? -1 : 1), 0.0, 0.0));
+                    case MOVEY -> as.teleport(as.getLocation().add(0.0, 0.05 * (p.isSneaking() ? -1 : 1), 0.0));
+                    case MOVEZ -> as.teleport(as.getLocation().add(0.0, 0.0, 0.05 * (p.isSneaking() ? -1 : 1)));
+                    case ROTAT -> {
                         Location l = as.getLocation();
                         l.setYaw(((float) num) * 180F);
                         as.teleport(l);
-                        break;
-                    case GUI:
-                        new ArmorStandGUI(plugin, as, p);
-                        break;
-                    default:
-                        cancel = tool == ArmorStandTool.SUMMON || tool == ArmorStandTool.SAVE || event.isCancelled();
+                    }
+                    case GUI -> new ArmorStandGUI(plugin, as, p);
+                    default -> cancel = tool == ArmorStandTool.SUMMON || tool == ArmorStandTool.SAVE || event.isCancelled();
                 }
                 event.setCancelled(cancel);
                 return;
@@ -265,8 +219,7 @@ public class MainListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) return;
-        final Player p = (Player) event.getWhoClicked();
+        if (!(event.getWhoClicked() instanceof final Player p)) return;
         final ItemStack item = event.getCurrentItem();
         if (event.getInventory().getHolder() != p && ArmorStandTool.isTool(item)) {
             event.setCancelled(true);
@@ -283,8 +236,7 @@ public class MainListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onInventoryDrag(InventoryDragEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) return;
-        final Player p = (Player) event.getWhoClicked();
+        if (!(event.getWhoClicked() instanceof final Player p)) return;
         if (event.getInventory().getHolder() != p && Utils.containsItems(event.getNewItems().values())) {
             event.setCancelled(true);
             p.updateInventory();
@@ -352,8 +304,7 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (event.getEntity() instanceof ArmorStand) {
-            final ArmorStand as = (ArmorStand) event.getEntity();
+        if (event.getEntity() instanceof final ArmorStand as) {
 
             if (ArmorStandGUI.isInUse(as) || as.isInvulnerable()) {
                 event.setCancelled(true);
@@ -369,8 +320,7 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof ArmorStand) {
-            final ArmorStand as = (ArmorStand) event.getEntity();
+        if (event.getEntity() instanceof final ArmorStand as) {
             if (ArmorStandGUI.isInUse(as) || as.isInvulnerable()) {
                 event.setCancelled(true);
             }

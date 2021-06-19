@@ -24,12 +24,11 @@ class Commands implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof final Player p)) {
             plugin.getLogger().warning(Config.notConsole);
             return false;
         }
         final String cmd = command.getName().toLowerCase();
-        final Player p = (Player) sender;
         if (cmd.equals("astools") || cmd.equals("ast")) {
             if (!Utils.hasPermissionNode(p, "astools.command")) {
                 p.sendMessage(ChatColor.RED + Config.noCommandPerm);

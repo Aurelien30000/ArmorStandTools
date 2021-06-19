@@ -31,7 +31,7 @@ public abstract class NMS {
     }
 
     private Class<?> getNMSClass(String nmsClassString) throws ClassNotFoundException {
-        return Class.forName("net.minecraft.server." + nmsVersion + "." + nmsClassString);
+        return Class.forName("net.minecraft." + nmsClassString);
     }
 
     private Object getNmsEntity(org.bukkit.entity.Entity entity) {
@@ -49,10 +49,10 @@ public abstract class NMS {
             public void run() {
                 try {
                     final Object world = b.getWorld().getClass().getMethod("getHandle").invoke(b.getWorld());
-                    final Object blockPos = getNMSClass("BlockPosition").getConstructor(int.class, int.class, int.class).newInstance(b.getX(), b.getY(), b.getZ());
-                    final Object sign = world.getClass().getMethod("getTileEntity", getNMSClass("BlockPosition")).invoke(world, blockPos);
+                    final Object blockPos = getNMSClass("core.BlockPosition").getConstructor(int.class, int.class, int.class).newInstance(b.getX(), b.getY(), b.getZ());
+                    final Object sign = world.getClass().getMethod("getTileEntity", getNMSClass("core.BlockPosition")).invoke(world, blockPos);
                     final Object player = p.getClass().getMethod("getHandle").invoke(p);
-                    player.getClass().getMethod("openSign", getNMSClass("TileEntitySign")).invoke(player, sign);
+                    player.getClass().getMethod("openSign", getNMSClass("world.level.block.entity.TileEntitySign")).invoke(player, sign);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -112,8 +112,7 @@ public abstract class NMS {
             return "";
         }
         final StringBuilder tags = new StringBuilder();
-        if (is.getItemMeta() != null && is.getItemMeta() instanceof LeatherArmorMeta) {
-            LeatherArmorMeta armorMeta = (LeatherArmorMeta) is.getItemMeta();
+        if (is.getItemMeta() != null && is.getItemMeta() instanceof LeatherArmorMeta armorMeta) {
             tags.append("display:{color:");
             tags.append(armorMeta.getColor().asRGB());
             tags.append("}");
@@ -139,10 +138,9 @@ public abstract class NMS {
     }
 
     private String skullOwner(ItemStack is) {
-        if (is == null || is.getItemMeta() == null || !(is.getItemMeta() instanceof SkullMeta)) {
+        if (is == null || is.getItemMeta() == null || !(is.getItemMeta() instanceof final SkullMeta skull)) {
             return "";
         }
-        final SkullMeta skull = (SkullMeta) is.getItemMeta();
         if (skull.hasOwner()) {
             return ",SkullOwner:\"" + skull.getOwningPlayer().getName() + "\"";
         } else {

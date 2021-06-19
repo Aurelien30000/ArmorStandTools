@@ -113,8 +113,7 @@ class ArmorStandGUI implements Listener {
 
     private String plrHeadName(ArmorStand as) {
         if (as.getItem(EquipmentSlot.HEAD).getType() == Material.AIR) return null;
-        if (!(as.getItem(EquipmentSlot.HEAD).getItemMeta() instanceof SkullMeta)) return null;
-        final SkullMeta meta = (SkullMeta) as.getItem(EquipmentSlot.HEAD).getItemMeta();
+        if (!(as.getItem(EquipmentSlot.HEAD).getItemMeta() instanceof final SkullMeta meta)) return null;
         if (!meta.hasOwner()) return null;
         return meta.getOwningPlayer().getName();
     }
@@ -223,8 +222,7 @@ class ArmorStandGUI implements Listener {
 
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
-        if (!event.getInventory().equals(i) || !(event.getWhoClicked() instanceof Player)) return;
-        final Player p = (Player) event.getWhoClicked();
+        if (!event.getInventory().equals(i) || !(event.getWhoClicked() instanceof final Player p)) return;
         boolean invModified = false;
         for (int slot : event.getRawSlots()) {
             if (slot < i.getSize()) {
