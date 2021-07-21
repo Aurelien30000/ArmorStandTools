@@ -1,4 +1,4 @@
-package com.gmail.St3venAU.plugins.ArmorStandTools;
+package com.gmail.st3venau.plugins.armorstandtools;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -60,7 +60,8 @@ public class ArmorStandCmd {
     }
 
     boolean execute(Player p) {
-        if (command == null) return true;
+        if (command == null)
+            return true;
         if (isOnCooldown()) {
             p.sendMessage(ChatColor.RED + Config.cmdOnCooldown);
             return true;
@@ -82,13 +83,15 @@ public class ArmorStandCmd {
 
     boolean save() {
         removeAssignedCommand(armorStand);
-        if (command == null) return false;
+        if (command == null)
+            return false;
         cleanUpCommand();
         return command.length() != 0 && armorStand.addScoreboardTag(getTag());
     }
 
     public void cloneTo(ArmorStand clone) {
-        if (command == null) return;
+        if (command == null)
+            return;
         final ArmorStandCmd asCmd = new ArmorStandCmd(clone, command, console);
         asCmd.save();
     }
@@ -115,14 +118,15 @@ public class ArmorStandCmd {
         if (cooldownTime == -1) {
             cooldownTime = Config.defaultASCmdCooldownTicks;
         }
-        if (cooldownTime < 1) return;
-        armorStand.setMetadata("ast-cmd-cooldown", new FixedMetadataValue(Main.plugin, true));
+        if (cooldownTime < 1)
+            return;
+        armorStand.setMetadata("ast-cmd-cooldown", new FixedMetadataValue(AST.plugin, true));
         new BukkitRunnable() {
             @Override
             public void run() {
-                armorStand.removeMetadata("ast-cmd-cooldown", Main.plugin);
+                armorStand.removeMetadata("ast-cmd-cooldown", AST.plugin);
             }
-        }.runTaskLater(Main.plugin, cooldownTime);
+        }.runTaskLater(AST.plugin, cooldownTime);
     }
 
     private boolean isOnCooldown() {
@@ -131,7 +135,8 @@ public class ArmorStandCmd {
 
     // Positive cooldown: Set cooldown time, Negative cooldown: Remove cooldown time
     void setCooldownTime(int cooldown) {
-        if (armorStand == null) return;
+        if (armorStand == null)
+            return;
         final List<String> tags = new ArrayList<>();
         for (String tag : armorStand.getScoreboardTags()) {
             if (tag.startsWith("ast-cdn-")) {
@@ -141,12 +146,14 @@ public class ArmorStandCmd {
         for (String tag : tags) {
             armorStand.removeScoreboardTag(tag);
         }
-        if (cooldown < 0) return;
+        if (cooldown < 0)
+            return;
         armorStand.addScoreboardTag("ast-cdn-" + cooldown);
     }
 
     private int getCooldownTime() {
-        if (armorStand == null) return -1;
+        if (armorStand == null)
+            return -1;
         for (String tag : armorStand.getScoreboardTags()) {
             if (tag.startsWith("ast-cdn-")) {
                 final String[] split = tag.split("ast-cdn-");

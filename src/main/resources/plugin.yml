@@ -1,15 +1,15 @@
-main: com.gmail.St3venAU.plugins.ArmorStandTools.Main
+main: com.gmail.st3venau.plugins.armorstandtools.AST
 name: ArmorStandTools
 version: ${project.version}
 api-version: 1.17
 author: St3venAU
 description: Armor stand manipulation tools
-softdepend: [ WorldGuard, PlotSquared, ChestShop , ShopGUIPlus ]
+softdepend: [ WorldGuard, PlotSquared ]
 commands:
   astools:
-    description: Give yourself the armor stand tools
+    description: Provides player instructions on how to use AST
     aliases: ast
-    usage: Usage /astools or /astools reload
+    usage: Usage /astools or /ast, /ast new, /ast reload
   ascmd:
     description: View/Remove/Assign the command assigned to the nearest armor stand
     usage: Usage /ascmd view, /ascmd remove, /ascmd assign <player/console> <command>

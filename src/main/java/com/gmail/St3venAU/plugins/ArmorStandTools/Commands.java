@@ -1,60 +1,60 @@
-package com.gmail.St3venAU.plugins.ArmorStandTools;
+package com.gmail.st3venau.plugins.armorstandtools;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 class Commands implements CommandExecutor, TabCompleter {
 
-    private final Main plugin;
-
-    Commands(Main main) {
-        this.plugin = main;
-    }
-
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(sender instanceof final Player p)) {
-            plugin.getLogger().warning(Config.notConsole);
+            AST.plugin.getLogger().warning(Config.notConsole);
             return false;
         }
         final String cmd = command.getName().toLowerCase();
         if (cmd.equals("astools") || cmd.equals("ast")) {
-            if (!Utils.hasPermissionNode(p, "astools.command")) {
+            if (!Utils.hasPermissionNode(p, "astools.use")) {
                 p.sendMessage(ChatColor.RED + Config.noCommandPerm);
                 return true;
             }
-            if (args.length == 0) {
-                UUID uuid = p.getUniqueId();
-                if (plugin.savedInventories.containsKey(uuid)) {
-                    plugin.restoreInventory(p);
-                } else {
-                    plugin.saveInventoryAndClear(p);
-                    ArmorStandTool.give(p);
-                    p.sendMessage(ChatColor.GREEN + Config.giveMsg1);
-                    p.sendMessage(ChatColor.AQUA + Config.giveMsg2);
+            if (args.length > 0 && args[0].equalsIgnoreCase("new")) {
+                // astools new
+                if (!Utils.hasPermissionNode(p, "astools.new")) {
+                    p.sendMessage(ChatColor.RED + Config.noCommandPerm);
+                    return true;
                 }
-                return true;
-            }
-            if (args[0].equalsIgnoreCase("reload")) {
+                final Location l = Utils.getLocationFacing(p.getLocation());
+                if (l.getWorld() == null) {
+                    p.sendMessage(ChatColor.RED + Config.error);
+                    return true;
+                }
+                ArmorStand as = (ArmorStand) l.getWorld().spawnEntity(l, EntityType.ARMOR_STAND);
+                AST.pickUpArmorStand(as, p);
+                Utils.title(p, Config.carrying);
+            } else if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
                 if (Utils.hasPermissionNode(p, "astools.reload")) {
-                    Config.reload();
-                    p.sendMessage(ChatColor.GREEN + Config.conReload);
+                    Config.reload(null);
+                    p.sendMessage(ChatColor.GREEN + Config.reloaded);
                 } else {
-                    p.sendMessage(ChatColor.RED + Config.noRelPerm);
+                    p.sendMessage(ChatColor.RED + Config.noCommandPerm);
                 }
                 return true;
             }
+            p.sendMessage(ChatColor.AQUA + Config.instructions1 + ChatColor.GREEN + " /ast new " + ChatColor.AQUA + Config.instructions2);
+            return true;
         } else if (cmd.equals("ascmd")) {
             final ArmorStand as = getNearbyArmorStand(p);
             if (as == null) {
@@ -120,7 +120,7 @@ class Commands implements CommandExecutor, TabCompleter {
                 for (int i = 2; i < args.length; i++) {
                     sb.append(args[i]).append(" ");
                 }
-                int startAt = sb.charAt(0) == '/' ? 1 : 0;
+                final int startAt = sb.charAt(0) == '/' ? 1 : 0;
                 final String c = sb.substring(startAt, sb.length() - 1);
                 if (c.length() == 0) {
                     ascmdHelp(p);
@@ -135,6 +135,10 @@ class Commands implements CommandExecutor, TabCompleter {
                     p.sendMessage("\n" + Config.assignCmdError + name);
                 }
             } else if (args.length >= 2 && args[0].equalsIgnoreCase("cooldown")) { //ascmd cooldown <ticks>/remove
+                if (!Utils.hasPermissionNode(p, "astools.ascmd.cooldown")) {
+                    p.sendMessage(ChatColor.RED + Config.noCommandPerm);
+                    return true;
+                }
                 if (!Utils.hasPermissionNode(p, "astools.ascmd.cooldown")) {
                     p.sendMessage(ChatColor.RED + Config.noCommandPerm);
                     return true;
@@ -188,7 +192,7 @@ class Commands implements CommandExecutor, TabCompleter {
 
     private ArmorStand getNearbyArmorStand(Player p) {
         ArmorStand closest = null;
-        double dist = 1000000;
+        final double dist = 1000000;
         for (Entity e : p.getNearbyEntities(4, 4, 4)) {
             if (e instanceof ArmorStand && e.getLocation().distanceSquared(p.getLocation()) < dist) {
                 closest = (ArmorStand) e;
@@ -197,7 +201,7 @@ class Commands implements CommandExecutor, TabCompleter {
         return closest;
     }
 
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, Command command, @NotNull String alias, String[] args) {
         final List<String> list = new ArrayList<>();
         final String cmd = command.getName().toLowerCase();
         String typed = "";
@@ -218,7 +222,7 @@ class Commands implements CommandExecutor, TabCompleter {
                     }
                 }
             } else if (args.length == 2 && args[0].equalsIgnoreCase("cooldown")) {
-                String s = "remove";
+                final String s = "remove";
                 if (s.startsWith(typed)) {
                     list.add(s);
                 }

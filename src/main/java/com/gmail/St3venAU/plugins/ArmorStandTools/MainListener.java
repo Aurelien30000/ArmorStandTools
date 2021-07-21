@@ -1,361 +1,149 @@
-package com.gmail.St3venAU.plugins.ArmorStandTools;
+package com.gmail.st3venau.plugins.armorstandtools;
 
-import com.destroystokyo.paper.event.player.PlayerAdvancementCriterionGrantEvent;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
-import org.bukkit.entity.*;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.inventory.InventoryAction;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.player.*;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
-import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class MainListener implements Listener {
 
-    private final Pattern MC_USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_]{3,16}$");
-    private final Main plugin;
-
-    MainListener(Main main) {
-        this.plugin = main;
-    }
+    private static final Pattern MC_USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_]{3,16}$");
 
     @EventHandler
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
-        if (event.getRightClicked() instanceof ArmorStand as) {
-            Player p = event.getPlayer();
-
-            if (!event.isCancelled() && ArmorStandGUI.isInUse(as)) {
-                Utils.actionBarMsg(p, Config.guiInUse);
-                event.setCancelled(true);
-                return;
-            }
-            if (!event.isCancelled() && plugin.carryingArmorStand.containsKey(p.getUniqueId())) {
-                if (plugin.playerHasPermission(p, plugin.carryingArmorStand.get(p.getUniqueId()).getLocation().getBlock(), null)) {
-                    plugin.carryingArmorStand.remove(p.getUniqueId());
-                    Utils.actionBarMsg(p, Config.asDropped);
-                    event.setCancelled(true);
-                    return;
-                } else {
-                    p.sendMessage(ChatColor.RED + Config.wgNoPerm);
-                }
-            }
-            ArmorStandTool tool = ArmorStandTool.get(p);
-            if (!event.isCancelled() && tool != null) {
-                if (!plugin.playerHasPermission(p, as.getLocation().getBlock(), tool)) {
-                    p.sendMessage(ChatColor.RED + Config.generalNoPerm);
-                    event.setCancelled(true);
-                    return;
-                }
-                double num = event.getClickedPosition().getY() - 0.05;
-                if (num < 0) {
-                    num = 0;
-                } else if (num > 2) {
-                    num = 2;
-                }
-                num = 2.0 - num;
-                double angle = num * Math.PI;
-                boolean cancel = true;
-
-                switch (tool) {
-                    case HEADX -> as.setHeadPose(as.getHeadPose().setX(angle));
-                    case HEADY -> as.setHeadPose(as.getHeadPose().setY(angle));
-                    case HEADZ -> as.setHeadPose(as.getHeadPose().setZ(angle));
-                    case LARMX -> as.setLeftArmPose(as.getLeftArmPose().setX(angle));
-                    case LARMY -> as.setLeftArmPose(as.getLeftArmPose().setY(angle));
-                    case LARMZ -> as.setLeftArmPose(as.getLeftArmPose().setZ(angle));
-                    case RARMX -> as.setRightArmPose(as.getRightArmPose().setX(angle));
-                    case RARMY -> as.setRightArmPose(as.getRightArmPose().setY(angle));
-                    case RARMZ -> as.setRightArmPose(as.getRightArmPose().setZ(angle));
-                    case LLEGX -> as.setLeftLegPose(as.getLeftLegPose().setX(angle));
-                    case LLEGY -> as.setLeftLegPose(as.getLeftLegPose().setY(angle));
-                    case LLEGZ -> as.setLeftLegPose(as.getLeftLegPose().setZ(angle));
-                    case RLEGX -> as.setRightLegPose(as.getRightLegPose().setX(angle));
-                    case RLEGY -> as.setRightLegPose(as.getRightLegPose().setY(angle));
-                    case RLEGZ -> as.setRightLegPose(as.getRightLegPose().setZ(angle));
-                    case BODYX -> as.setBodyPose(as.getBodyPose().setX(angle));
-                    case BODYY -> as.setBodyPose(as.getBodyPose().setY(angle));
-                    case BODYZ -> as.setBodyPose(as.getBodyPose().setZ(angle));
-                    case MOVEX -> as.teleport(as.getLocation().add(0.05 * (p.isSneaking() ? -1 : 1), 0.0, 0.0));
-                    case MOVEY -> as.teleport(as.getLocation().add(0.0, 0.05 * (p.isSneaking() ? -1 : 1), 0.0));
-                    case MOVEZ -> as.teleport(as.getLocation().add(0.0, 0.0, 0.05 * (p.isSneaking() ? -1 : 1)));
-                    case ROTAT -> {
-                        Location l = as.getLocation();
-                        l.setYaw(((float) num) * 180F);
-                        as.teleport(l);
-                    }
-                    case GUI -> new ArmorStandGUI(plugin, as, p);
-                    default -> cancel = tool == ArmorStandTool.SUMMON || tool == ArmorStandTool.SAVE || event.isCancelled();
-                }
-                event.setCancelled(cancel);
-                return;
-            }
-            if ((Config.ignoreWGForASCmdExecution || !event.isCancelled()) && !p.isSneaking()) {
-                ArmorStandCmd asCmd = new ArmorStandCmd(as);
-                if (asCmd.getCommand() != null) {
-                    event.setCancelled(true);
-                    if (Utils.hasPermissionNode(p, "astools.ascmd.execute")) {
-                        if (!asCmd.execute(p)) {
-                            p.sendMessage(Config.executeCmdError);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @EventHandler
-    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-        if (event.getRightClicked() instanceof ItemFrame && ArmorStandTool.isHoldingTool(event.getPlayer())) {
-            event.setCancelled(true);
-            event.getPlayer().updateInventory();
-        }
-    }
-
-    @EventHandler
-    public void onBlockPlace(BlockPlaceEvent event) {
-        if (ArmorStandTool.isHoldingTool(event.getPlayer())) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler
-    public void onPlayerMove(PlayerMoveEvent event) {
         final Player p = event.getPlayer();
-        final ArmorStand as = plugin.carryingArmorStand.get(p.getUniqueId());
-        if (as != null) {
-            if (as == null || as.isDead()) {
-                plugin.carryingArmorStand.remove(p.getUniqueId());
-                Utils.actionBarMsg(p, Config.asDropped);
+        if (!(event.getRightClicked() instanceof ArmorStand as))
+            return;
+        final boolean hasAstPerm = Utils.hasPermissionNode(p, "astools.use");
+        AST.debug(p.getName() + " right-clicked " + as.getName() + ", Crouching: " + p.isSneaking() + ", Has astools.use perm: " + hasAstPerm);
+        if (p.isSneaking() && hasAstPerm) {
+            if (ArmorStandGUI.isInUse(as)) {
+                Utils.title(p, Config.guiInUse);
+                event.setCancelled(true);
+                AST.debug("Interaction cancelled as Armor Stand GUI is in use");
                 return;
             }
-            as.teleport(Utils.getLocationFacing(event.getTo()));
-            Utils.actionBarMsg(p, Config.carrying);
+            if (!AST.playerHasPermission(p, as.getLocation().getBlock(), null)) {
+                p.sendMessage(ChatColor.RED + Config.generalNoPerm);
+                return;
+            }
+            new ArmorStandGUI(as, p);
+            event.setCancelled(true);
+            return;
+        }
+        if ((Config.ignoreWGForASCmdExecution || !event.isCancelled()) && !p.isSneaking()) {
+            final ArmorStandCmd asCmd = new ArmorStandCmd(as);
+            if (asCmd.getCommand() != null) {
+                event.setCancelled(true);
+                if (Utils.hasPermissionNode(p, "astools.ascmd.execute")) {
+                    if (!asCmd.execute(p)) {
+                        p.sendMessage(Config.executeCmdError);
+                    }
+                }
+            }
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    ArmorStand getCarryingArmorStand(Player p) {
+        final UUID uuid = p.getUniqueId();
+        return ArmorStandTool.MOVE == AST.activeTool.get(uuid) ? AST.selectedArmorStand.get(uuid) : null;
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
+        if (event.getFrom().getWorld() == event.getTo().getWorld())
+            return;
         final Player p = event.getPlayer();
-        boolean sameWorld = event.getFrom().getWorld() == event.getTo().getWorld();
-        if (plugin.carryingArmorStand.containsKey(p.getUniqueId())) {
-            UUID uuid = event.getPlayer().getUniqueId();
-            final ArmorStand as = plugin.carryingArmorStand.get(uuid);
-            if (as == null || as.isDead()) {
-                plugin.carryingArmorStand.remove(p.getUniqueId());
-                Utils.actionBarMsg(p, Config.asDropped);
-                return;
-            }
-            if (sameWorld || Config.allowMoveWorld) {
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        as.teleport(Utils.getLocationFacing(p.getLocation()));
-                        Utils.actionBarMsg(p, Config.carrying);
-                    }
-                }.runTaskLater(plugin, 1L);
-            } else {
-                plugin.returnArmorStand(plugin.carryingArmorStand.get(uuid));
-                plugin.carryingArmorStand.remove(uuid);
-                if (plugin.savedInventories.containsKey(uuid)) {
-                    plugin.restoreInventory(p);
-                }
-            }
-        }
-        if (Config.deactivateOnWorldChange && !sameWorld && plugin.savedInventories.containsKey(p.getUniqueId())) {
-            plugin.restoreInventory(p);
-        }
-    }
-
-    @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent event) {
-        final Player p = event.getEntity();
-        List<ItemStack> drops = event.getDrops();
-        for (ArmorStandTool t : ArmorStandTool.values()) {
-            drops.remove(t.getItem());
-        }
-        if (p.getWorld().getGameRuleValue(GameRule.KEEP_INVENTORY)) return;
-        if (Bukkit.getServer().getPluginManager().getPermission("essentials.keepinv") != null && Utils.hasPermissionNode(p, "essentials.keepinv", true))
-            return;
-        if (plugin.savedInventories.containsKey(p.getUniqueId())) {
-            drops.addAll(Arrays.asList(plugin.savedInventories.get(p.getUniqueId())));
-            plugin.savedInventories.remove(p.getUniqueId());
-        }
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onCraftItem(CraftItemEvent event) {
-        final Player p = (Player) event.getWhoClicked();
-        final Inventory inventory = event.getInventory();
-        for (ItemStack is : inventory.getContents()) {
-            if (ArmorStandTool.isTool(is)) {
-                event.setCancelled(true);
-                p.updateInventory();
-                return;
-            }
-        }
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof final Player p)) return;
-        final ItemStack item = event.getCurrentItem();
-        if (event.getInventory().getHolder() != p && ArmorStandTool.isTool(item)) {
-            event.setCancelled(true);
-            p.updateInventory();
+        final ArmorStand as = getCarryingArmorStand(p);
+        if (as == null || as.isDead()) {
+            stopEditing(p, false);
             return;
         }
-        if (event.getAction() == InventoryAction.HOTBAR_SWAP || event.getAction() == InventoryAction.HOTBAR_MOVE_AND_READD) {
-            if (Utils.hasAnyTools(p)) {
-                event.setCancelled(true);
-                p.updateInventory();
-            }
-        }
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onInventoryDrag(InventoryDragEvent event) {
-        if (!(event.getWhoClicked() instanceof final Player p)) return;
-        if (event.getInventory().getHolder() != p && Utils.containsItems(event.getNewItems().values())) {
-            event.setCancelled(true);
-            p.updateInventory();
-        }
-    }
-
-    @EventHandler
-    public void onPlayerDropItem(final PlayerDropItemEvent event) {
-        if (ArmorStandTool.isTool(event.getItemDrop().getItemStack())) {
-            event.setCancelled(true);
-            Bukkit.getScheduler().runTaskLater(plugin, () -> Utils.cycleInventory(event.getPlayer()), 1L);
+        if (!Config.allowMoveWorld) {
+            AST.returnArmorStand(as);
+            stopEditing(p, true);
         }
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        final UUID uuid = event.getPlayer().getUniqueId();
-        final ArmorStand as = plugin.carryingArmorStand.get(uuid);
-        if (as != null) {
-            plugin.returnArmorStand(as);
-            plugin.carryingArmorStand.remove(uuid);
-        }
-        if (plugin.savedInventories.containsKey(uuid)) {
-            plugin.restoreInventory(event.getPlayer());
-        }
+        stopEditing(event.getPlayer(), true);
     }
 
-    @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        final Player p = event.getPlayer();
-        final ArmorStand as = plugin.carryingArmorStand.get(p.getUniqueId());
-        if (as != null) {
-            if (plugin.playerHasPermission(p, as.getLocation().getBlock(), null)) {
-                plugin.carryingArmorStand.remove(p.getUniqueId());
-                Utils.actionBarMsg(p, Config.asDropped);
-                p.setMetadata("lastDrop", new FixedMetadataValue(plugin, System.currentTimeMillis()));
-                event.setCancelled(true);
+    boolean stopEditing(Player p, boolean force) {
+        final ArmorStand carrying = getCarryingArmorStand(p);
+        if (carrying != null && !carrying.isDead()) {
+            if (AST.playerHasPermission(p, carrying.getLocation().getBlock(), null)) {
+                Utils.title(p, Config.asDropped);
+                carrying.removeMetadata("clone", AST.plugin);
             } else {
-                p.sendMessage(ChatColor.RED + Config.wgNoPerm);
-            }
-            return;
-        }
-        final ArmorStandTool tool = ArmorStandTool.get(event.getItem());
-        if (tool == null) return;
-        event.setCancelled(true);
-        final Action action = event.getAction();
-        if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK) {
-            Utils.cycleInventory(p);
-        } else if ((action == Action.RIGHT_CLICK_BLOCK || action == Action.RIGHT_CLICK_AIR) && tool == ArmorStandTool.SUMMON) {
-            if (!plugin.playerHasPermission(p, event.getClickedBlock(), tool)) {
-                p.sendMessage(ChatColor.RED + Config.generalNoPerm);
-                return;
-            }
-            final Location l = Utils.getLocationFacing(p.getLocation());
-            plugin.pickUpArmorStand(spawnArmorStand(l), p, true);
-            Utils.actionBarMsg(p, Config.carrying);
-        }
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                p.updateInventory();
-            }
-        }.runTaskLater(plugin, 1L);
-    }
-
-    @EventHandler
-    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (event.getEntity() instanceof final ArmorStand as) {
-
-            if (ArmorStandGUI.isInUse(as) || as.isInvulnerable()) {
-                event.setCancelled(true);
-            }
-            if (event.getDamager() instanceof Player && ArmorStandTool.isHoldingTool((Player) event.getDamager())) {
-                event.setCancelled(true);
-                if (noCooldown(event.getDamager())) {
-                    Utils.cycleInventory((Player) event.getDamager());
+                if (force) {
+                    AST.returnArmorStand(carrying);
+                } else {
+                    p.sendMessage(ChatColor.RED + Config.wgNoPerm);
+                    return true;
                 }
             }
         }
+        final UUID uuid = p.getUniqueId();
+        AST.selectedArmorStand.remove(uuid);
+        final boolean editing = AST.activeTool.containsKey(uuid);
+        if (editing) {
+            AST.activeTool.remove(uuid);
+            Utils.title(p, "");
+        }
+        return editing;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        final Player p = event.getPlayer();
+        if (stopEditing(p, false)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        if (event.getEntity() instanceof final ArmorStand as) {
+            if (event.getDamager() instanceof Player && stopEditing((Player) event.getDamager(), false)) {
+                event.setCancelled(true);
+                return;
+            }
+            if (ArmorStandGUI.isInUse(as) || as.isInvulnerable()) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
     public void onEntityDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof final ArmorStand as) {
             if (ArmorStandGUI.isInUse(as) || as.isInvulnerable()) {
                 event.setCancelled(true);
             }
         }
-    }
-
-    private boolean noCooldown(Entity e) {
-        for (MetadataValue meta : e.getMetadata("lastDrop")) {
-            if (meta.getOwningPlugin() == plugin) {
-                return System.currentTimeMillis() - meta.asFloat() > 100;
-            }
-        }
-        return true;
-    }
-
-    private ArmorStand spawnArmorStand(Location l) {
-        final ArmorStand as = (ArmorStand) l.getWorld().spawnEntity(l, EntityType.ARMOR_STAND);
-        as.setHelmet(Config.helmet);
-        as.setChestplate(Config.chest);
-        as.setLeggings(Config.pants);
-        as.setBoots(Config.boots);
-        as.getEquipment().setItemInMainHand(Config.itemInHand);
-        as.getEquipment().setItemInOffHand(Config.itemInOffHand);
-        as.setVisible(Config.isVisible);
-        as.setSmall(Config.isSmall);
-        as.setArms(Config.hasArms);
-        as.setBasePlate(Config.hasBasePlate);
-        as.setGravity(Config.hasGravity);
-        as.setInvulnerable(Config.invulnerable);
-        if (Config.defaultName.length() > 0) {
-            as.setCustomName(Config.defaultName);
-            as.setCustomNameVisible(true);
-        }
-        Main.nms.setSlotsDisabled(as, Config.equipmentLock);
-        return as;
     }
 
     @EventHandler
@@ -368,84 +156,70 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onSignChange(final SignChangeEvent event) {
-        if (event.getBlock().hasMetadata("armorStand")) {
-            final Block b = event.getBlock();
-            final ArmorStand as = getArmorStand(b);
-            if (as != null) {
-                final StringBuilder sb = new StringBuilder();
-                for (String line : event.getLines()) {
-                    if (line != null && line.length() > 0) {
-                        sb.append(ChatColor.translateAlternateColorCodes('&', line));
-                    }
-                }
-                final String input = sb.toString();
-                if (b.hasMetadata("setName")) {
-                    if (input.length() > 0) {
-                        as.setCustomName(input);
-                        as.setCustomNameVisible(true);
-                    } else {
-                        as.setCustomName("");
-                        as.setCustomNameVisible(false);
-                        as.setCustomNameVisible(false);
-                    }
-                } else if (b.hasMetadata("setSkull")) {
-                    if (MC_USERNAME_PATTERN.matcher(input).matches()) {
-                        b.setMetadata("protected", new FixedMetadataValue(plugin, true));
-                        event.getPlayer().sendMessage(ChatColor.GOLD + Config.pleaseWait);
-                        final String cmd = "minecraft:give " + event.getPlayer().getName() + " minecraft:player_head{SkullOwner:\"" + input + "\"} 1";
-                        final String current = b.getWorld().getGameRuleValue("sendCommandFeedback");
-                        b.getWorld().setGameRuleValue("sendCommandFeedback", "false");
-                        Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd);
-                        b.getWorld().setGameRuleValue("sendCommandFeedback", current);
-                        boolean found = false;
-                        for (int slot : event.getPlayer().getInventory().all(Material.PLAYER_HEAD).keySet()) {
-                            final ItemStack skull = event.getPlayer().getInventory().getItem(slot);
-                            final SkullMeta sm = (SkullMeta) skull.getItemMeta();
-                            if (sm.hasOwner() && input.equalsIgnoreCase(sm.getOwningPlayer().getName())) {
-                                as.setItem(EquipmentSlot.HEAD, skull);
-                                event.getPlayer().sendMessage(ChatColor.GREEN + Config.appliedHead + ChatColor.GOLD + " " + input);
-                                event.getPlayer().getInventory().setItem(slot, null);
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            event.getPlayer().sendMessage(ChatColor.GOLD + Config.headFailed);
-                        }
-                    } else {
-                        event.getPlayer().sendMessage(ChatColor.RED + input + " " + Config.invalidName);
-                    }
+        final Block b = event.getBlock();
+        if (!b.hasMetadata("armorStand")) {
+            return;
+        }
+        final ArmorStand as = getArmorStand(b);
+        if (as != null) {
+            final StringBuilder sb = new StringBuilder();
+            for (String line : event.getLines()) {
+                if (!line.isEmpty()) {
+                    sb.append(ChatColor.translateAlternateColorCodes('&', line));
                 }
             }
-            event.setCancelled(true);
-            b.removeMetadata("armorStand", plugin);
-            b.removeMetadata("setName", plugin);
-            b.removeMetadata("setSkull", plugin);
-            b.setType(Material.AIR);
+            final String input = sb.toString();
+            if (b.hasMetadata("setName")) {
+                if (input.length() > 0) {
+                    as.setCustomName(input);
+                    as.setCustomNameVisible(true);
+                } else {
+                    as.setCustomName("");
+                    as.setCustomNameVisible(false);
+                    as.setCustomNameVisible(false);
+                }
+            } else if (b.hasMetadata("setSkull")) {
+                if (MC_USERNAME_PATTERN.matcher(input).matches()) {
+                    if (as.getEquipment() != null) {
+                        as.getEquipment().setHelmet(getPlayerHead(input));
+                    }
+                } else {
+                    event.getPlayer().sendMessage(ChatColor.RED + input + " " + Config.invalidName);
+                }
+            }
         }
+        event.setCancelled(true);
+        b.removeMetadata("armorStand", AST.plugin);
+        b.removeMetadata("setName", AST.plugin);
+        b.removeMetadata("setSkull", AST.plugin);
+        b.setType(Material.AIR);
     }
 
-    @EventHandler
-    public void onPlayerCommand(final PlayerCommandPreprocessEvent event) {
-        final Player p = event.getPlayer();
-        String cmd = event.getMessage().split(" ")[0].toLowerCase();
-        while (cmd.length() > 0 && cmd.charAt(0) == '/') {
-            cmd = cmd.substring(1);
+    @SuppressWarnings("deprecation")
+    private ItemStack getPlayerHead(String playerName) {
+        OfflinePlayer offlinePlayer = Bukkit.getServer().getPlayer(playerName);
+        if (offlinePlayer == null) {
+            offlinePlayer = Bukkit.getOfflinePlayer(playerName);
         }
-        if (cmd.length() > 0 && Config.deniedCommands.contains(cmd) && Utils.hasAnyTools(p)) {
-            event.setCancelled(true);
-            p.sendMessage(ChatColor.RED + Config.cmdNotAllowed);
+        final ItemStack item = new ItemStack(Material.PLAYER_HEAD);
+        final SkullMeta meta = (SkullMeta) item.getItemMeta();
+        if (meta == null) {
+            Bukkit.getLogger().warning("Skull item meta was null");
+            return item;
         }
+        meta.setOwningPlayer(offlinePlayer);
+        item.setItemMeta(meta);
+        return item;
     }
 
     private ArmorStand getArmorStand(Block b) {
         UUID uuid = null;
         for (MetadataValue value : b.getMetadata("armorStand")) {
-            if (value.getOwningPlugin() == plugin) {
+            if (value.getOwningPlugin() == AST.plugin) {
                 uuid = (UUID) value.value();
             }
         }
-        b.removeMetadata("armorStand", plugin);
+        b.removeMetadata("armorStand", AST.plugin);
         if (uuid != null) {
             for (Entity e : b.getWorld().getEntities()) {
                 if (e instanceof ArmorStand && e.getUniqueId().equals(uuid)) {
@@ -456,19 +230,11 @@ public class MainListener implements Listener {
         return null;
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerAdvancementCriterionGrantEvent(PlayerAdvancementCriterionGrantEvent event) {
-        if (plugin.savedInventories.containsKey(event.getPlayer().getUniqueId())) {
-            event.setCancelled(true);
-        }
-    }
-
     // Give all permissions to all players - for testing only
     /*@EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player p = event.getPlayer();
-        PermissionAttachment attachment = p.addAttachment(plugin);
-        attachment.setPermission("astools.command", true);
+        PermissionAttachment attachment = p.addAttachment(AST.plugin);
         attachment.setPermission("astools.use", true);
         attachment.setPermission("astools.summon", true);
         attachment.setPermission("astools.clone", true);
@@ -479,7 +245,9 @@ public class MainListener implements Listener {
         attachment.setPermission("astools.ascmd.remove", true);
         attachment.setPermission("astools.ascmd.assign.player", true);
         attachment.setPermission("astools.ascmd.assign.console", true);
+        attachment.setPermission("astools.ascmd.cooldown", true);
         attachment.setPermission("astools.ascmd.execute", true);
+        attachment.setPermission("astools.new", true);
         //attachment.setPermission("astools.bypass-wg-flag", true);
     }*/
 

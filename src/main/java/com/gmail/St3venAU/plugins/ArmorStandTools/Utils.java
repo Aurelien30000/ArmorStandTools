@@ -1,62 +1,162 @@
-package com.gmail.St3venAU.plugins.ArmorStandTools;
+package com.gmail.st3venau.plugins.armorstandtools;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.CommandBlock;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.Map;
 
 public class Utils {
 
     private static DecimalFormat twoDec;
 
-    public static boolean containsItems(Collection<ItemStack> items) {
-        for (ItemStack i : items) {
-            if (ArmorStandTool.get(i) != null) {
-                return true;
+    static void openSign(final Player p, final Block b) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                try {
+                    final Object world = b.getWorld().getClass().getMethod("getHandle").invoke(b.getWorld());
+                    final Object position = Class.forName("net.minecraft.core.BlockPosition").getConstructor(int.class, int.class, int.class).newInstance(b.getX(), b.getY(), b.getZ());
+                    final Object sign = world.getClass().getMethod("getTileEntity", Class.forName("net.minecraft.core.BlockPosition")).invoke(world, position);
+                    final Object player = p.getClass().getMethod("getHandle").invoke(p);
+                    player.getClass().getMethod("openSign", Class.forName("net.minecraft.world.level.block.entity.TileEntitySign")).invoke(player, sign);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        return false;
+        }.runTaskLater(AST.plugin, 2L);
     }
 
-    public static boolean hasPermissionNode(Player player, String perm, boolean ignoreOp) {
-        if (!ignoreOp && ((player == null) || player.isOp())) {
+    static boolean hasDisabledSlots(ArmorStand as) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            for (ArmorStand.LockType lockType : ArmorStand.LockType.values()) {
+                if (!as.hasEquipmentLock(slot, lockType)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    static void setSlotsDisabled(ArmorStand as, boolean slotsDisabled) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            for (ArmorStand.LockType lockType : ArmorStand.LockType.values()) {
+                if (slotsDisabled) {
+                    as.addEquipmentLock(slot, lockType);
+                } else {
+                    as.removeEquipmentLock(slot, lockType);
+                }
+            }
+        }
+    }
+
+    static int disabledSlotsAsInteger(ArmorStand as) {
+        return (as.hasEquipmentLock(EquipmentSlot.HAND, ArmorStand.LockType.ADDING_OR_CHANGING) ? 1 : 0)
+                + (as.hasEquipmentLock(EquipmentSlot.FEET, ArmorStand.LockType.ADDING_OR_CHANGING) ? 2 : 0)
+                + (as.hasEquipmentLock(EquipmentSlot.LEGS, ArmorStand.LockType.ADDING_OR_CHANGING) ? 4 : 0)
+                + (as.hasEquipmentLock(EquipmentSlot.CHEST, ArmorStand.LockType.ADDING_OR_CHANGING) ? 8 : 0)
+                + (as.hasEquipmentLock(EquipmentSlot.HEAD, ArmorStand.LockType.ADDING_OR_CHANGING) ? 16 : 0)
+                + (as.hasEquipmentLock(EquipmentSlot.OFF_HAND, ArmorStand.LockType.ADDING_OR_CHANGING) ? 32 : 0)
+
+                + (as.hasEquipmentLock(EquipmentSlot.HAND, ArmorStand.LockType.REMOVING_OR_CHANGING) ? 256 : 0)
+                + (as.hasEquipmentLock(EquipmentSlot.FEET, ArmorStand.LockType.REMOVING_OR_CHANGING) ? 512 : 0)
+                + (as.hasEquipmentLock(EquipmentSlot.LEGS, ArmorStand.LockType.REMOVING_OR_CHANGING) ? 1024 : 0)
+                + (as.hasEquipmentLock(EquipmentSlot.CHEST, ArmorStand.LockType.REMOVING_OR_CHANGING) ? 2048 : 0)
+                + (as.hasEquipmentLock(EquipmentSlot.HEAD, ArmorStand.LockType.REMOVING_OR_CHANGING) ? 4096 : 0)
+                + (as.hasEquipmentLock(EquipmentSlot.OFF_HAND, ArmorStand.LockType.REMOVING_OR_CHANGING) ? 8192 : 0)
+
+                + (as.hasEquipmentLock(EquipmentSlot.HAND, ArmorStand.LockType.ADDING) ? 65536 : 0)
+                + (as.hasEquipmentLock(EquipmentSlot.FEET, ArmorStand.LockType.ADDING) ? 131072 : 0)
+                + (as.hasEquipmentLock(EquipmentSlot.LEGS, ArmorStand.LockType.ADDING) ? 262144 : 0)
+                + (as.hasEquipmentLock(EquipmentSlot.CHEST, ArmorStand.LockType.ADDING) ? 524288 : 0)
+                + (as.hasEquipmentLock(EquipmentSlot.HEAD, ArmorStand.LockType.ADDING) ? 1048576 : 0)
+                + (as.hasEquipmentLock(EquipmentSlot.OFF_HAND, ArmorStand.LockType.ADDING) ? 2097152 : 0);
+    }
+
+    static boolean toggleSlotsDisabled(ArmorStand as) {
+        final boolean slotsDisabled = !hasDisabledSlots(as);
+        setSlotsDisabled(as, slotsDisabled);
+        return slotsDisabled;
+    }
+
+    static ArmorStand cloneArmorStand(ArmorStand as) {
+        final ArmorStand clone = (ArmorStand) as.getWorld().spawnEntity(as.getLocation().add(1, 0, 0), EntityType.ARMOR_STAND);
+        final EntityEquipment asEquipment = as.getEquipment();
+        final EntityEquipment cloneEquipment = clone.getEquipment();
+        if (asEquipment != null && cloneEquipment != null) {
+            cloneEquipment.setHelmet(asEquipment.getHelmet());
+            cloneEquipment.setChestplate(asEquipment.getChestplate());
+            cloneEquipment.setLeggings(asEquipment.getLeggings());
+            cloneEquipment.setBoots(asEquipment.getBoots());
+            cloneEquipment.setItemInMainHand(asEquipment.getItemInMainHand());
+            cloneEquipment.setItemInOffHand(asEquipment.getItemInOffHand());
+        }
+        clone.setHeadPose(as.getHeadPose());
+        clone.setBodyPose(as.getBodyPose());
+        clone.setLeftArmPose(as.getLeftArmPose());
+        clone.setRightArmPose(as.getRightArmPose());
+        clone.setLeftLegPose(as.getLeftLegPose());
+        clone.setRightLegPose(as.getRightLegPose());
+        clone.setGravity(as.hasGravity());
+        clone.setVisible(as.isVisible());
+        clone.setBasePlate(as.hasBasePlate());
+        clone.setArms(as.hasArms());
+        clone.setCustomName(as.getCustomName());
+        clone.setCustomNameVisible(as.isCustomNameVisible());
+        clone.setSmall(as.isSmall());
+        clone.setInvulnerable(as.isInvulnerable());
+        clone.setGlowing(as.isGlowing());
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            for (ArmorStand.LockType lockType : ArmorStand.LockType.values()) {
+                if (as.hasEquipmentLock(slot, lockType)) {
+                    clone.addEquipmentLock(slot, lockType);
+                }
+            }
+        }
+        final ArmorStandCmd asCmd = new ArmorStandCmd(as);
+        if (asCmd.getCommand() != null) {
+            asCmd.cloneTo(clone);
+        }
+        clone.setMetadata("clone", new FixedMetadataValue(AST.plugin, true));
+        return clone;
+    }
+
+    static boolean hasPermissionNode(Player p, String perm) {
+        if ((p == null) || p.isOp()) {
             return true;
         }
-        if (player.hasPermission(perm)) {
+        if (p.hasPermission(perm)) {
             return true;
         }
         final String[] nodes = perm.split("\\.");
         final StringBuilder n = new StringBuilder();
         for (int i = 0; i < (nodes.length - 1); i++) {
             n.append(nodes[i]).append(".");
-            if (player.hasPermission(n + "*")) {
+            if (p.hasPermission(n + "*")) {
                 return true;
             }
         }
         return false;
     }
 
-    public static boolean hasPermissionNode(Player player, String perm) {
-        return hasPermissionNode(player, perm, false);
-    }
-
-    public static boolean hasAnyTools(Player p) {
-        for (ItemStack i : p.getInventory()) {
-            if (ArmorStandTool.isTool(i)) {
-                return true;
-            }
-        }
-        return false;
+    static void title(Player p, String msg) {
+        p.sendTitle(" ", msg, 0, 70, 0);
     }
 
     public static Location getLocationFacing(Location loc) {
@@ -81,60 +181,163 @@ public class Utils {
         return l;
     }
 
-    public static void cycleInventory(Player p) {
-        final Inventory i = p.getInventory();
-        for (int n = 0; n < 9; n++) {
-            final ItemStack temp = i.getItem(n);
-            i.setItem(n, i.getItem(27 + n));
-            i.setItem(27 + n, i.getItem(18 + n));
-            i.setItem(18 + n, i.getItem(9 + n));
-            i.setItem(9 + n, temp);
+    static private String getItemStackTags(ItemStack is) {
+        if (is == null) {
+            return "";
         }
-        p.updateInventory();
+        final StringBuilder tags = new StringBuilder();
+        if (is.getItemMeta() != null && is.getItemMeta() instanceof LeatherArmorMeta armorMeta) {
+            tags.append("display:{color:");
+            tags.append(armorMeta.getColor().asRGB());
+            tags.append("}");
+        }
+        final Map<Enchantment, Integer> enchants = is.getEnchantments();
+        if (enchants.size() > 0) {
+            if (tags.length() > 0) {
+                tags.append(",");
+            }
+            tags.append("Enchantments:[");
+
+            for (Enchantment e : enchants.keySet()) {
+                tags.append("{id:");
+                tags.append(e.getKey().getKey());
+                tags.append(",lvl:");
+                tags.append(enchants.get(e));
+                tags.append("},");
+            }
+
+            tags.setCharAt(tags.length() - 1, ']');
+        }
+        return tags.length() == 0 ? "" : tags.toString();
     }
 
-    public static String angle(double d) {
-        return twoDec(d * 180.0 / Math.PI);
+    static private String skullOwner(ItemStack is) {
+        if (is == null || is.getItemMeta() == null || !(is.getItemMeta() instanceof SkullMeta skull))
+            return "";
+        return skull.getOwningPlayer() == null ? "" : "SkullOwner:\"" + skull.getOwningPlayer().getName() + "\"";
     }
 
-    public static String twoDec(double d) {
+    static private boolean isEmpty(ItemStack is) {
+        return is == null || is.getType() == Material.AIR;
+    }
+
+    static private String itemInfo(ItemStack is) {
+        if (isEmpty(is))
+            return "{}";
+        final StringBuilder sb = new StringBuilder("{id:");
+        sb.append(is.getType().getKey().getKey());
+        if (is.getAmount() > 0) {
+            sb.append(",Count:").append(is.getAmount());
+        }
+        final String itemStackTags = getItemStackTags(is);
+        @SuppressWarnings("deprecation") final short durability = is.getDurability();
+        final String skullOwner = skullOwner(is);
+        int n = 0;
+        if (itemStackTags.length() > 0 || durability > 0 || skullOwner.length() > 0) {
+            sb.append(",tag:{");
+            if (durability > 0) {
+                sb.append("Damage:").append(durability);
+                n++;
+            }
+            if (itemStackTags.length() > 0) {
+                if (n > 0) sb.append(",");
+                sb.append(itemStackTags);
+                n++;
+            }
+            if (skullOwner.length() > 0) {
+                if (n > 0) sb.append(",");
+                sb.append(skullOwner);
+            }
+            sb.append("}");
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
+    static private String armorItems(EntityEquipment e) {
+        if (e == null || (isEmpty(e.getBoots()) && isEmpty(e.getLeggings()) && isEmpty(e.getChestplate()) && isEmpty(e.getHelmet()))) {
+            return "";
+        }
+        return "ArmorItems:["
+                + itemInfo(e.getBoots()) + ","
+                + itemInfo(e.getLeggings()) + ","
+                + itemInfo(e.getChestplate()) + ","
+                + itemInfo(e.getHelmet())
+                + "],";
+    }
+
+    static private String handItems(EntityEquipment e) {
+        if (e == null || (isEmpty(e.getItemInMainHand()) && isEmpty(e.getItemInOffHand()))) {
+            return "";
+        }
+        return "HandItems:["
+                + itemInfo(e.getItemInMainHand()) + ","
+                + itemInfo(e.getItemInOffHand())
+                + "],";
+    }
+
+    static private String angleInfo(EulerAngle ea) {
+        return "[" + degrees(ea.getX()) + "f," + degrees(ea.getY()) + "f," + degrees(ea.getZ()) + "f]";
+    }
+
+    static private String pose(ArmorStand as) {
+        return "Pose:{"
+                + "Body:" + angleInfo(as.getBodyPose()) + ","
+                + "Head:" + angleInfo(as.getHeadPose()) + ","
+                + "LeftLeg:" + angleInfo(as.getLeftLegPose()) + ","
+                + "RightLeg:" + angleInfo(as.getRightLegPose()) + ","
+                + "LeftArm:" + angleInfo(as.getLeftArmPose()) + ","
+                + "RightArm:" + angleInfo(as.getRightArmPose())
+                + "}";
+    }
+
+    static private String createSummonCommand(ArmorStand as) {
+        final Location asLocation = as.getLocation();
+        final EntityEquipment e = as.getEquipment();
+        final StringBuilder sb = new StringBuilder("summon minecraft:armor_stand ");
+        sb.append(twoDec(asLocation.getX())).append(" ");
+        sb.append(twoDec(asLocation.getY())).append(" ");
+        sb.append(twoDec(asLocation.getZ())).append(" ");
+        sb.append("{");
+        if (!as.isVisible()) sb.append("Invisible:1,");
+        if (!as.hasBasePlate()) sb.append("NoBasePlate:1,");
+        if (!as.hasGravity()) sb.append("NoGravity:1,");
+        if (as.hasArms()) sb.append("ShowArms:1,");
+        if (as.isSmall()) sb.append("Small:1,");
+        if (as.isInvulnerable()) sb.append("Invulnerable:1,");
+        if (as.isGlowing()) sb.append("Glowing:1,");
+        if (hasDisabledSlots(as)) sb.append("DisabledSlots:").append(disabledSlotsAsInteger(as)).append(",");
+        if (as.isCustomNameVisible()) sb.append("CustomNameVisible:1,");
+        if (as.getCustomName() != null) sb.append("CustomName:\"\\\"").append(as.getCustomName()).append("\\\"\",");
+        if (as.getLocation().getYaw() != 0F)
+            sb.append("Rotation:[").append(twoDec(as.getLocation().getYaw())).append("f],");
+        sb.append(armorItems(e));
+        sb.append(handItems(e));
+        sb.append(pose(as));
+        sb.append("}");
+        return sb.toString();
+    }
+
+    static void generateCmdBlock(Location l, ArmorStand as) {
+        final Block b = l.getBlock();
+        b.setType(Material.COMMAND_BLOCK);
+        final CommandBlock cb = (CommandBlock) b.getState();
+        cb.setCommand(createSummonCommand(as));
+        cb.update();
+    }
+
+    private static String twoDec(double d) {
         if (twoDec == null) {
             twoDec = new DecimalFormat("0.0#");
-            DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+            final DecimalFormatSymbols symbols = new DecimalFormatSymbols();
             symbols.setDecimalSeparator('.');
             twoDec.setDecimalFormatSymbols(symbols);
         }
         return twoDec.format(d);
     }
 
-    public static Block findAnAirBlock(Location l) {
-        while (l.getY() < 255 && l.getBlock().getType() != Material.AIR) {
-            l.add(0, 1, 0);
-        }
-        return l.getY() < 255 && l.getBlock().getType() == Material.AIR ? l.getBlock() : null;
-    }
-
-    public static ItemStack setLore(ItemStack is, String... lore) {
-        final ItemMeta meta = is.getItemMeta();
-        meta.setLore(Arrays.asList(lore));
-        is.setItemMeta(meta);
-        return is;
-    }
-
-    public static boolean toggleInvulnerability(ArmorStand as) {
-        final boolean inv = !as.isInvulnerable();
-        as.setInvulnerable(inv);
-        return inv;
-    }
-
-    public static void actionBarMsg(Player p, String msg) {
-        p.sendTitle("", msg, 0, 70, 0);
-    }
-
-    public static boolean toggleGlow(ArmorStand as) {
-        boolean glowing = !as.isGlowing();
-        as.setGlowing(glowing);
-        return glowing;
+    private static String degrees(double d) {
+        return twoDec(d * 180.0 / Math.PI);
     }
 
 }

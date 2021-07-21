@@ -1,16 +1,16 @@
-package com.gmail.St3venAU.plugins.ArmorStandTools.hooks;
+package com.gmail.st3venau.plugins.armorstandtools.hooks;
 
-import com.gmail.St3venAU.plugins.ArmorStandTools.Main;
+import com.gmail.st3venau.plugins.armorstandtools.AST;
 import org.bukkit.plugin.Plugin;
 
 import java.util.logging.Level;
 
 public abstract class Hook {
 
-    protected final Main plugin;
+    protected final AST plugin;
     protected final String name;
 
-    public Hook(Main plugin, String name) {
+    public Hook(AST plugin, String name) {
         this.plugin = plugin;
         this.name = name;
 
