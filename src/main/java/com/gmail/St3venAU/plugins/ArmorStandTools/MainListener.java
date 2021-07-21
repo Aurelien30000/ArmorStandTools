@@ -33,7 +33,7 @@ public class MainListener implements Listener {
     @EventHandler
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
         final Player p = event.getPlayer();
-        if (!(event.getRightClicked() instanceof ArmorStand as))
+        if (!(event.getRightClicked() instanceof final ArmorStand as))
             return;
         final boolean hasAstPerm = Utils.hasPermissionNode(p, "astools.use");
         AST.debug(p.getName() + " right-clicked " + as.getName() + ", Crouching: " + p.isSneaking() + ", Has astools.use perm: " + hasAstPerm);
@@ -116,7 +116,7 @@ public class MainListener implements Listener {
         return editing;
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         final Player p = event.getPlayer();
         if (stopEditing(p, false)) {
@@ -124,7 +124,7 @@ public class MainListener implements Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
         if (event.getEntity() instanceof final ArmorStand as) {
             if (event.getDamager() instanceof Player && stopEditing((Player) event.getDamager(), false)) {
@@ -137,7 +137,7 @@ public class MainListener implements Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof final ArmorStand as) {
             if (ArmorStandGUI.isInUse(as) || as.isInvulnerable()) {

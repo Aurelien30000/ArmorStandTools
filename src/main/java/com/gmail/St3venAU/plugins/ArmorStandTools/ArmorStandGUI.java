@@ -1,5 +1,7 @@
 package com.gmail.st3venau.plugins.armorstandtools;
 
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
@@ -16,8 +18,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 class ArmorStandGUI implements Listener {
@@ -29,8 +29,8 @@ class ArmorStandGUI implements Listener {
     private static final int INV_SLOT_R_HAND = 9;
     private static final int INV_SLOT_L_HAND = 11;
 
-    private static final Set<Integer> inUse = new HashSet<>();
-    private static final Set<Integer> invSlots = new HashSet<>();
+    private static final IntSet inUse = new IntOpenHashSet();
+    private static final IntSet invSlots = new IntOpenHashSet();
     private static ItemStack filler;
 
     private Inventory i;

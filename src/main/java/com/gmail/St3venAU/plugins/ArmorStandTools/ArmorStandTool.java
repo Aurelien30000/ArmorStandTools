@@ -248,7 +248,8 @@ public enum ArmorStandTool {
 
     private String plrHeadName(ArmorStand as) {
         final EntityEquipment entityEquipment = as.getEquipment();
-        if (entityEquipment == null || entityEquipment.getHelmet() == null || !(entityEquipment.getHelmet().getItemMeta() instanceof SkullMeta meta))
+        if (entityEquipment == null || entityEquipment.getHelmet() == null ||
+                !(entityEquipment.getHelmet().getItemMeta() instanceof final SkullMeta meta))
             return null;
         if (meta.getOwningPlayer() == null)
             return null;
