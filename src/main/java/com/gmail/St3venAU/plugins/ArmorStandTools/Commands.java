@@ -197,11 +197,11 @@ class Commands implements CommandExecutor, TabCompleter {
     private void ascmdHelp(Player p) {
         p.sendMessage("\n" + ChatColor.AQUA + Config.cmdHelp);
         p.sendMessage(Config.listAssignedCmds + ": " + ChatColor.YELLOW + "/ascmd list");
-        p.sendMessage(Config.addACmd + ":" + ChatColor.YELLOW + "/ascmd add <priority> <delay> <player/console/bungee> <command/bungee_server_name>");
+        p.sendMessage(Config.addACmd + ": " + ChatColor.YELLOW + "/ascmd add <priority> <delay> <player/console/bungee> <command/bungee_server_name>");
         p.sendMessage(Config.removeACmd + ": " + ChatColor.YELLOW + "/ascmd remove <command_number>");
-        p.sendMessage(Config.setCooldown + ":");
+        p.sendMessage(Config.setCooldown + ": ");
         p.sendMessage(ChatColor.YELLOW + "/ascmd cooldown <ticks>");
-        p.sendMessage(Config.removeCooldown + ":");
+        p.sendMessage(Config.removeCooldown + ": ");
         p.sendMessage(ChatColor.YELLOW + "/ascmd cooldown remove");
     }
 

@@ -253,7 +253,7 @@ public class ArmorStandMeta implements Serializable {
         if (arms)
             attribs.add(Config.arms + ": " + Config.isOn);
         if (small)
-            attribs.add(Config.small + ": " + Config.isOn);
+            attribs.add(Config.size + ": " + Config.small);
         if (invulnerable)
             attribs.add(Config.invuln + ": " + Config.isOn);
         if (glowing)
@@ -268,9 +268,10 @@ public class ArmorStandMeta implements Serializable {
                 }
                 if (sb.length() >= 40) {
                     lore.add(sb.toString());
-                    sb = new StringBuilder("" + ChatColor.YELLOW);
+                    sb = new StringBuilder(ChatColor.YELLOW.toString());
                 }
             }
+            lore.add(sb.toString());
         }
         return lore;
     }
