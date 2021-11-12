@@ -14,7 +14,8 @@ public abstract class Hook {
         this.plugin = plugin;
         this.name = name;
 
-        if (checkCompatbility()) register();
+        if (checkCompatbility())
+            register();
     }
 
     public boolean checkCompatbility() {
