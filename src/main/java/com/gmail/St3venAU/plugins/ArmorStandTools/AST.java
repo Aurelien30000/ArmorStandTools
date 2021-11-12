@@ -33,7 +33,7 @@ public class AST extends JavaPlugin {
 
     final static Map<UUID, ArmorStandTool> activeTool = new HashMap<>();
     final static Map<UUID, ArmorStand> selectedArmorStand = new HashMap<>();
-    final static Map<UUID, ItemStack[]> savedInventories = new HashMap<>();
+    public final static Map<UUID, ItemStack[]> savedInventories = new HashMap<>();
 
     static AST plugin;
     static String nmsVersion;

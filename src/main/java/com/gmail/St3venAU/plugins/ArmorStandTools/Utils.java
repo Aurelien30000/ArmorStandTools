@@ -6,20 +6,23 @@ import org.bukkit.block.Block;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Collection;
 import java.util.Map;
 
 public class Utils {
@@ -95,48 +98,6 @@ public class Utils {
         return slotsDisabled;
     }
 
-    static ArmorStand cloneArmorStand(ArmorStand as) {
-        final ArmorStand clone = (ArmorStand) as.getWorld().spawnEntity(as.getLocation().add(1, 0, 0), EntityType.ARMOR_STAND);
-        final EntityEquipment asEquipment = as.getEquipment();
-        final EntityEquipment cloneEquipment = clone.getEquipment();
-        if (asEquipment != null && cloneEquipment != null) {
-            cloneEquipment.setHelmet(asEquipment.getHelmet());
-            cloneEquipment.setChestplate(asEquipment.getChestplate());
-            cloneEquipment.setLeggings(asEquipment.getLeggings());
-            cloneEquipment.setBoots(asEquipment.getBoots());
-            cloneEquipment.setItemInMainHand(asEquipment.getItemInMainHand());
-            cloneEquipment.setItemInOffHand(asEquipment.getItemInOffHand());
-        }
-        clone.setHeadPose(as.getHeadPose());
-        clone.setBodyPose(as.getBodyPose());
-        clone.setLeftArmPose(as.getLeftArmPose());
-        clone.setRightArmPose(as.getRightArmPose());
-        clone.setLeftLegPose(as.getLeftLegPose());
-        clone.setRightLegPose(as.getRightLegPose());
-        clone.setGravity(as.hasGravity());
-        clone.setVisible(as.isVisible());
-        clone.setBasePlate(as.hasBasePlate());
-        clone.setArms(as.hasArms());
-        clone.setCustomName(as.getCustomName());
-        clone.setCustomNameVisible(as.isCustomNameVisible());
-        clone.setSmall(as.isSmall());
-        clone.setInvulnerable(as.isInvulnerable());
-        clone.setGlowing(as.isGlowing());
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            for (ArmorStand.LockType lockType : ArmorStand.LockType.values()) {
-                if (as.hasEquipmentLock(slot, lockType)) {
-                    clone.addEquipmentLock(slot, lockType);
-                }
-            }
-        }
-        final ArmorStandCmd asCmd = new ArmorStandCmd(as);
-        if (asCmd.getCommand() != null) {
-            asCmd.cloneTo(clone);
-        }
-        clone.setMetadata("clone", new FixedMetadataValue(AST.plugin, true));
-        return clone;
-    }
-
     static boolean hasPermissionNode(Player p, String perm) {
         if ((p == null) || p.isOp()) {
             return true;
@@ -179,6 +140,15 @@ public class Utils {
             l.subtract(0, 5, 0);
         }
         return l;
+    }
+
+    static boolean containsItems(Collection<ItemStack> items) {
+        for (ItemStack i : items) {
+            if (ArmorStandTool.get(i) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static private String getItemStackTags(ItemStack is) {
@@ -291,7 +261,7 @@ public class Utils {
                 + "}";
     }
 
-    static private String createSummonCommand(ArmorStand as) {
+    static String createSummonCommand(ArmorStand as) {
         final Location asLocation = as.getLocation();
         final EntityEquipment e = as.getEquipment();
         final StringBuilder sb = new StringBuilder("summon minecraft:armor_stand ");
@@ -299,16 +269,26 @@ public class Utils {
         sb.append(twoDec(asLocation.getY())).append(" ");
         sb.append(twoDec(asLocation.getZ())).append(" ");
         sb.append("{");
-        if (!as.isVisible()) sb.append("Invisible:1,");
-        if (!as.hasBasePlate()) sb.append("NoBasePlate:1,");
-        if (!as.hasGravity()) sb.append("NoGravity:1,");
-        if (as.hasArms()) sb.append("ShowArms:1,");
-        if (as.isSmall()) sb.append("Small:1,");
-        if (as.isInvulnerable()) sb.append("Invulnerable:1,");
-        if (as.isGlowing()) sb.append("Glowing:1,");
-        if (hasDisabledSlots(as)) sb.append("DisabledSlots:").append(disabledSlotsAsInteger(as)).append(",");
-        if (as.isCustomNameVisible()) sb.append("CustomNameVisible:1,");
-        if (as.getCustomName() != null) sb.append("CustomName:\"\\\"").append(as.getCustomName()).append("\\\"\",");
+        if (!as.isVisible())
+            sb.append("Invisible:1,");
+        if (!as.hasBasePlate())
+            sb.append("NoBasePlate:1,");
+        if (!as.hasGravity())
+            sb.append("NoGravity:1,");
+        if (as.hasArms())
+            sb.append("ShowArms:1,");
+        if (as.isSmall())
+            sb.append("Small:1,");
+        if (as.isInvulnerable())
+            sb.append("Invulnerable:1,");
+        if (as.isGlowing())
+            sb.append("Glowing:1,");
+        if (hasDisabledSlots(as))
+            sb.append("DisabledSlots:").append(disabledSlotsAsInteger(as)).append(",");
+        if (as.isCustomNameVisible())
+            sb.append("CustomNameVisible:1,");
+        if (as.getCustomName() != null)
+            sb.append("CustomName:\"\\\"").append(as.getCustomName()).append("\\\"\",");
         if (as.getLocation().getYaw() != 0F)
             sb.append("Rotation:[").append(twoDec(as.getLocation().getYaw())).append("f],");
         sb.append(armorItems(e));
@@ -318,15 +298,15 @@ public class Utils {
         return sb.toString();
     }
 
-    static void generateCmdBlock(Location l, ArmorStand as) {
+    static void generateCmdBlock(Location l, String command) {
         final Block b = l.getBlock();
         b.setType(Material.COMMAND_BLOCK);
         final CommandBlock cb = (CommandBlock) b.getState();
-        cb.setCommand(createSummonCommand(as));
+        cb.setCommand(command);
         cb.update();
     }
 
-    private static String twoDec(double d) {
+    static String twoDec(double d) {
         if (twoDec == null) {
             twoDec = new DecimalFormat("0.0#");
             final DecimalFormatSymbols symbols = new DecimalFormatSymbols();
@@ -338,6 +318,39 @@ public class Utils {
 
     private static String degrees(double d) {
         return twoDec(d * 180.0 / Math.PI);
+    }
+
+    static boolean hasAnyTools(Player p) {
+        for (ItemStack i : p.getInventory()) {
+            if (ArmorStandTool.isTool(i)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean onCooldown(Entity e) {
+        for (MetadataValue meta : e.getMetadata("lastEvent")) {
+            if (AST.plugin.equals(meta.getOwningPlugin())) {
+                return System.currentTimeMillis() - meta.asLong() < 100;
+            }
+        }
+        return false;
+    }
+
+    static void cycleInventory(Player p) {
+        if (onCooldown(p))
+            return;
+        final Inventory i = p.getInventory();
+        for (int n = 0; n < 9; n++) {
+            final ItemStack temp = i.getItem(n);
+            i.setItem(n, i.getItem(27 + n));
+            i.setItem(27 + n, i.getItem(18 + n));
+            i.setItem(18 + n, i.getItem(9 + n));
+            i.setItem(9 + n, temp);
+        }
+        p.updateInventory();
+        p.setMetadata("lastEvent", new FixedMetadataValue(AST.plugin, System.currentTimeMillis()));
     }
 
 }
