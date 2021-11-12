@@ -271,12 +271,6 @@ public class ArmorStandMeta implements Serializable {
                     sb = new StringBuilder("" + ChatColor.YELLOW);
                 }
             }
-            if (sb.length() < 3) {
-                final String last = lore.get(lore.size() - 1);
-                lore.add(last.substring(0, last.length() - 2));
-            } else {
-                lore.add(sb.substring(0, sb.length() - 2));
-            }
         }
         return lore;
     }
