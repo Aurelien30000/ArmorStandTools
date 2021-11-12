@@ -19,10 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ArmorStandMeta implements Serializable {
 
@@ -155,13 +152,11 @@ public class ArmorStandMeta implements Serializable {
         }
         final ItemStack is = new ItemStack(Material.ARMOR_STAND, 1);
         final ItemMeta meta = is.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ChatColor.AQUA + Config.configuredArmorStand);
-            meta.addEnchant(Enchantment.DURABILITY, 1, true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            meta.setLore(createLore());
-            is.setItemMeta(meta);
-        }
+        meta.setDisplayName(ChatColor.AQUA + Config.configuredArmorStand);
+        meta.addEnchant(Enchantment.DURABILITY, 1, true);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        meta.setLore(createLore());
+        is.setItemMeta(meta);
         try {
             final Class<?> craftItemStackClass = Class.forName("org.bukkit.craftbukkit." + AST.nmsVersion + ".inventory.CraftItemStack");
             final Object nmsStack = craftItemStackClass.getMethod("asNMSCopy", ItemStack.class)
@@ -187,7 +182,7 @@ public class ArmorStandMeta implements Serializable {
     }
 
     static ArmorStandMeta fromItem(ItemStack is) {
-        if (is == null)
+        if (is == null || !is.hasItemMeta())
             return null;
         final Object armorStandMetaObject;
         try {
@@ -248,28 +243,32 @@ public class ArmorStandMeta implements Serializable {
         }
         final List<String> attribs = new ArrayList<>();
         if (commandTags.size() > 0)
-            attribs.add(commandTags.size() + " " + Config.cmdsAssigned);
+            attribs.add(commandTags.size() + ": " + Config.cmdsAssigned);
         if (equipmentLocks.size() > 0)
-            attribs.add(Config.equip + " " + Config.locked);
+            attribs.add(Config.equip + ": " + Config.locked);
         if (!gravity)
-            attribs.add(Config.gravity + " " + Config.isOff);
+            attribs.add(Config.gravity + ": " + Config.isOff);
         if (!visible)
-            attribs.add(Config.invisible);
+            attribs.add(Config.invisible + ": " + Config.isOff);
         if (arms)
-            attribs.add(Config.arms);
+            attribs.add(Config.arms + ": " + Config.isOn);
         if (small)
-            attribs.add(Config.small);
+            attribs.add(Config.small + ": " + Config.isOn);
         if (invulnerable)
-            attribs.add(Config.invuln);
+            attribs.add(Config.invuln + ": " + Config.isOn);
         if (glowing)
-            attribs.add(Config.glowing);
+            attribs.add(Config.glowing + ": " + Config.isOn);
         if (attribs.size() > 0) {
-            final StringBuilder sb = new StringBuilder(Config.attributes + ": " + ChatColor.YELLOW);
-            for (String attrib : attribs) {
-                sb.append(attrib).append(", ");
+            StringBuilder sb = new StringBuilder(Config.attributes + ": " + ChatColor.YELLOW);
+            for (Iterator<String> iterator = attribs.iterator(); iterator.hasNext(); ) {
+                final String attrib = iterator.next();
+                sb.append(attrib);
+                if (iterator.hasNext()) {
+                    sb.append(ChatColor.GRAY).append(", ");
+                }
                 if (sb.length() >= 40) {
                     lore.add(sb.toString());
-                    sb.append(ChatColor.YELLOW);
+                    sb = new StringBuilder("" + ChatColor.YELLOW);
                 }
             }
             if (sb.length() < 3) {

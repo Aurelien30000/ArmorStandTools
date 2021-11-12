@@ -52,7 +52,8 @@ public class MainListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        if (Config.crouchRightClickOpensGUI && p.isSneaking() && Utils.hasPermissionNode(p, "astools.use")) {
+        final ArmorStandTool tool = ArmorStandTool.get(p);
+        if (Config.crouchRightClickOpensGUI && tool == null && p.isSneaking() && Utils.hasPermissionNode(p, "astools.use")) {
             if (!AST.playerHasPermission(p, as.getLocation().getBlock(), null)) {
                 p.sendMessage(ChatColor.RED + Config.generalNoPerm);
                 return;
@@ -61,7 +62,6 @@ public class MainListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        final ArmorStandTool tool = ArmorStandTool.get(p);
         if (!event.isCancelled() && tool != null) {
             if (!AST.playerHasPermission(p, as.getLocation().getBlock(), tool)) {
                 p.sendMessage(ChatColor.RED + Config.generalNoPerm);
@@ -266,18 +266,18 @@ public class MainListener implements Listener {
             return;
         }
         final Action action = event.getAction();
+        Block b = event.getClickedBlock();
         final BlockFace blockFace = event.getBlockFace();
         final ItemStack inHand = event.getItem();
-        Block b = event.getClickedBlock();
         final ArmorStandTool tool = ArmorStandTool.get(inHand);
         if (inHand != null && tool == null && b != null && action == Action.RIGHT_CLICK_BLOCK && blockFace != BlockFace.DOWN && inHand.getType() == Material.ARMOR_STAND) {
             b = b.getRelative(blockFace);
-            if (!AST.playerHasPermission(p, b, ArmorStandTool.ITEM)) {
-                p.sendMessage(ChatColor.RED + Config.generalNoPerm);
-                return;
-            }
             final ArmorStandMeta asm = ArmorStandMeta.fromItem(inHand);
             if (asm != null) {
+                if (!AST.playerHasPermission(p, b, ArmorStandTool.ITEM)) {
+                    p.sendMessage(ChatColor.RED + Config.generalNoPerm);
+                    return;
+                }
                 event.setCancelled(true);
                 final Location l = b.getLocation().add(0.5, 0, 0.5);
                 final ArmorStand as = (ArmorStand) b.getWorld().spawnEntity(l, EntityType.ARMOR_STAND);

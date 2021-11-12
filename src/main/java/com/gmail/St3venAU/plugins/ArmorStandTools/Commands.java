@@ -180,13 +180,13 @@ class Commands implements CommandExecutor, TabCompleter {
             final List<ArmorStandCmd> list = asCmdManager.getCommands();
             for (int n = 0; n < list.size(); n++) {
                 final ArmorStandCmd asCmd = list.get(n);
-                // #1 Priority:0 Delay:0 Type:Player Command:cmd
+                // #1 Priority: 0 Delay: 0 Type: Player Command: cmd
                 p.sendMessage(
                         ChatColor.GREEN + "#" + (n + 1) + " " +
-                                ChatColor.LIGHT_PURPLE + Config.priority + ":" + ChatColor.RESET + asCmd.priority() + " " +
-                                ChatColor.YELLOW + Config.delay + ":" + ChatColor.RESET + asCmd.delay() + " " +
-                                ChatColor.GOLD + Config.type + ":" + ChatColor.RESET + asCmd.type().getName() + " " +
-                                ChatColor.AQUA + Config.command + ":" + ChatColor.RESET + asCmd.command()
+                                ChatColor.LIGHT_PURPLE + Config.priority + ": " + ChatColor.RESET + asCmd.priority() + " " +
+                                ChatColor.YELLOW + Config.delay + ": " + ChatColor.RESET + asCmd.delay() + " " +
+                                ChatColor.GOLD + Config.type + ": " + ChatColor.RESET + asCmd.type().getName() + " " +
+                                ChatColor.AQUA + Config.command + ": " + ChatColor.RESET + asCmd.command()
                 );
             }
         } else {
