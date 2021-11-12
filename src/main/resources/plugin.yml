@@ -4,12 +4,12 @@ version: ${project.version}
 api-version: 1.17
 author: St3venAU
 description: Armor stand manipulation tools
-softdepend: [ WorldGuard, PlotSquared ]
+softdepend: [ WorldGuard, PlotSquared, ChestShop , ShopGUIPlus ]
 commands:
   astools:
-    description: Provides player instructions on how to use AST
+    description: Give yourself the armor stand tools
     aliases: ast
-    usage: Usage /astools or /ast, /ast new, /ast reload
+    usage: Usage /astools or /astools reload
   ascmd:
-    description: View/Remove/Assign the command assigned to the nearest armor stand
-    usage: Usage /ascmd view, /ascmd remove, /ascmd assign <player/console> <command>
+    description: List/Add/Remove commands assigned to the nearest armor stand
+    usage: Usage /ascmd list, /ascmd remove <command_number>, /ascmd add <priority> <delay> <player/console/bungee> <command/bungee_server_name>

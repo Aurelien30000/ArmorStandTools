@@ -13,28 +13,28 @@ import java.util.UUID;
 
 public class PlotSquaredHook extends Hook {
 
-    public static PlotAPI api;
+    public static PlotAPI API;
 
-    public PlotSquaredHook(AST AST) {
-        super(AST, "PlotSquared");
+    public PlotSquaredHook(AST ast) {
+        super(ast, "PlotSquared");
     }
 
     public static boolean isPlotWorld(Location l) {
-        return l.getWorld() != null && api.getPlotSquared().getPlotAreaManager().hasPlotArea(l.getWorld().getName());
+        return l.getWorld() != null && API.getPlotSquared().getPlotAreaManager().hasPlotArea(l.getWorld().getName());
     }
 
-    public static Boolean checkPermission(Player p, Location l) {
+    public static boolean checkPermission(Player p, Location l) {
         if (l.getWorld() == null)
-            return null;
+            return false;
         final com.plotsquared.core.location.Location plotLocation = com.plotsquared.core.location.Location.at(l.getWorld().getName(), BlockVector3.at(l.getBlockX(), l.getBlockY(), l.getBlockZ()));
         final PlotArea plotArea = plotLocation.getPlotArea();
         if (plotArea == null) {
             return p.hasPermission("plots.admin.build.road");
         }
         final Plot plot = plotArea.getPlot(plotLocation);
-        final PlotPlayer<?> pp = api.wrapPlayer(p.getUniqueId());
+        final PlotPlayer<?> pp = API.wrapPlayer(p.getUniqueId());
         if (pp == null)
-            return null;
+            return false;
         if (plot == null) {
             return pp.hasPermission("plots.admin.build.road");
         }
@@ -44,7 +44,7 @@ public class PlotSquaredHook extends Hook {
 
     @Override
     public void register() {
-        api = new PlotAPI();
+        API = new PlotAPI();
     }
 
 }
