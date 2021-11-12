@@ -139,7 +139,7 @@ enableTool:
   bodyZ: true
   summon: true
   gui: true
-  rotate: true
+  rotat: true
   gui_clone: true
   gui_gen_cmd: true
   gui_invis: true
