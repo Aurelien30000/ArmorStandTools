@@ -3,7 +3,6 @@ package com.gmail.st3venau.plugins.armorstandtools;
 import com.destroystokyo.paper.event.player.PlayerAdvancementCriterionGrantEvent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -11,7 +10,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -26,7 +24,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Arrays;
@@ -53,7 +50,7 @@ public class MainListener implements Listener {
             return;
         }
         final ArmorStandTool tool = ArmorStandTool.get(p);
-        if (Config.crouchRightClickOpensGUI && tool == null && p.isSneaking() && Utils.hasPermissionNode(p, "astools.use")) {
+        if (tool == null && p.isSneaking() && Config.crouchRightClickOpensGUI && Utils.hasPermissionNode(p, "astools.use")) {
             if (!AST.playerHasPermission(p, as.getLocation().getBlock(), null)) {
                 p.sendMessage(ChatColor.RED + Config.generalNoPerm);
                 return;
@@ -266,33 +263,8 @@ public class MainListener implements Listener {
             return;
         }
         final Action action = event.getAction();
-        Block b = event.getClickedBlock();
-        final BlockFace blockFace = event.getBlockFace();
         final ItemStack inHand = event.getItem();
         final ArmorStandTool tool = ArmorStandTool.get(inHand);
-        if (inHand != null && tool == null && b != null && action == Action.RIGHT_CLICK_BLOCK && blockFace != BlockFace.DOWN && inHand.getType() == Material.ARMOR_STAND) {
-            b = b.getRelative(blockFace);
-            final ArmorStandMeta asm = ArmorStandMeta.fromItem(inHand);
-            if (asm != null) {
-                if (!AST.playerHasPermission(p, b, ArmorStandTool.ITEM)) {
-                    p.sendMessage(ChatColor.RED + Config.generalNoPerm);
-                    return;
-                }
-                event.setCancelled(true);
-                final Location l = b.getLocation().add(0.5, 0, 0.5);
-                final ArmorStand as = (ArmorStand) b.getWorld().spawnEntity(l, EntityType.ARMOR_STAND);
-                asm.applyToArmorStand(as);
-                if (p.getGameMode() != GameMode.CREATIVE) {
-                    if (inHand.getAmount() == 1) {
-                        p.getInventory().setItemInMainHand(null);
-                    } else {
-                        inHand.setAmount(inHand.getAmount() - 1);
-                        p.getInventory().setItemInMainHand(inHand);
-                    }
-                }
-                return;
-            }
-        }
         if (tool == null)
             return;
         event.setCancelled(true);
@@ -376,43 +348,58 @@ public class MainListener implements Listener {
     }
 
     @EventHandler
-    public void onSignChange(final SignChangeEvent event) {
-        final Block b = event.getBlock();
-        if (!b.hasMetadata("armorStand")) {
+    public void onPlayerChat(AsyncPlayerChatEvent event) {
+        final Player p = event.getPlayer();
+        final UUID plrUuid = p.getUniqueId();
+        final UUID uuid;
+        final boolean name;
+        final int taskId;
+        if (AST.waitingForName.containsKey(plrUuid)) {
+            uuid = AST.waitingForName.get(plrUuid).getKey();
+            taskId = AST.waitingForName.get(plrUuid).getValue();
+            name = true;
+        } else if (AST.waitingForSkull.containsKey(plrUuid)) {
+            uuid = AST.waitingForSkull.get(plrUuid).getKey();
+            taskId = AST.waitingForSkull.get(plrUuid).getValue();
+            name = false;
+        } else {
             return;
         }
-        final ArmorStand as = getArmorStand(b);
-        if (as != null) {
-            final StringBuilder sb = new StringBuilder();
-            for (String line : event.getLines()) {
-                if (!line.isEmpty()) {
-                    sb.append(ChatColor.translateAlternateColorCodes('&', line));
-                }
-            }
-            final String input = sb.toString();
-            if (b.hasMetadata("setName")) {
-                if (input.length() > 0) {
-                    as.setCustomName(input);
-                    as.setCustomNameVisible(true);
-                } else {
-                    as.setCustomName("");
-                    as.setCustomNameVisible(false);
-                    as.setCustomNameVisible(false);
-                }
-            } else if (b.hasMetadata("setSkull")) {
-                if (MC_USERNAME_PATTERN.matcher(input).matches()) {
-                    as.getEquipment();
-                    as.getEquipment().setHelmet(getPlayerHead(input));
-                } else {
-                    event.getPlayer().sendMessage(ChatColor.RED + input + " " + Config.invalidName);
-                }
-            }
-        }
         event.setCancelled(true);
-        b.removeMetadata("armorStand", AST.plugin);
-        b.removeMetadata("setName", AST.plugin);
-        b.removeMetadata("setSkull", AST.plugin);
-        b.setType(Material.AIR);
+        Bukkit.getScheduler().cancelTask(taskId);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                final ArmorStand as = getArmorStand(uuid, p.getWorld());
+                if (as != null) {
+                    String input = ChatColor.translateAlternateColorCodes('&', event.getMessage());
+                    if (input.equals("&")) input = "";
+                    if (name) {
+                        if (input.length() > 0) {
+                            as.setCustomName(input);
+                            as.setCustomNameVisible(true);
+                            p.sendMessage(ChatColor.GREEN + Config.nameSet);
+                        } else {
+                            as.setCustomName("");
+                            as.setCustomNameVisible(false);
+                            as.setCustomNameVisible(false);
+                            p.sendMessage(ChatColor.GREEN + Config.nameRemoved);
+                        }
+                    } else {
+                        if (MC_USERNAME_PATTERN.matcher(input).matches()) {
+                            as.getEquipment();
+                            as.getEquipment().setHelmet(getPlayerHead(input));
+                            p.sendMessage(ChatColor.GREEN + Config.skullSet);
+                        } else {
+                            p.sendMessage(ChatColor.RED + input + " " + Config.invalidName);
+                        }
+                    }
+                    AST.waitingForName.remove(plrUuid);
+                    AST.waitingForSkull.remove(plrUuid);
+                    Utils.title(p, " ");
+                }
+            }
+        }.runTask(AST.plugin);
     }
 
     private ItemStack getPlayerHead(String playerName) {
@@ -444,16 +431,9 @@ public class MainListener implements Listener {
         }
     }
 
-    private ArmorStand getArmorStand(Block b) {
-        UUID uuid = null;
-        for (MetadataValue value : b.getMetadata("armorStand")) {
-            if (value.getOwningPlugin() == AST.plugin) {
-                uuid = (UUID) value.value();
-            }
-        }
-        b.removeMetadata("armorStand", AST.plugin);
-        if (uuid != null) {
-            for (Entity e : b.getWorld().getEntities()) {
+    private ArmorStand getArmorStand(UUID uuid, World w) {
+        if (uuid != null && w != null) {
+            for (Entity e : w.getEntities()) {
                 if (e instanceof ArmorStand && e.getUniqueId().equals(uuid)) {
                     return (ArmorStand) e;
                 }

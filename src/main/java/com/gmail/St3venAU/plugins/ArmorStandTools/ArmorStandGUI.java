@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -18,7 +17,6 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashSet;
@@ -203,9 +201,7 @@ class ArmorStandGUI implements Listener {
                 Utils.title(p, Config.asVisible + ": " + (as.isVisible() ? Config.isTrue : Config.isFalse));
                 break;
             case CLONE:
-                final ArmorStand clone = (ArmorStand) as.getWorld().spawnEntity(as.getLocation().add(1, 0, 0), EntityType.ARMOR_STAND);
-                new ArmorStandMeta(as).applyToArmorStand(clone);
-                clone.setMetadata("clone", new FixedMetadataValue(AST.plugin, true));
+                ArmorStand clone = Utils.cloneArmorStand(as);
                 AST.pickUpArmorStand(clone, p, true);
                 Utils.title(p, Config.carrying);
                 break;
@@ -268,16 +264,13 @@ class ArmorStandGUI implements Listener {
                 Utils.title(p, Config.glow + ": " + (glowing ? Config.isOn : Config.isOff));
                 break;
             case ITEM:
-                final ArmorStandMeta asm = new ArmorStandMeta(as);
-                final ItemStack item = asm.convertToItem();
-                if (item != null) {
-                    p.closeInventory();
-                    if (p.getInventory().addItem(item).size() > 0) {
-                        p.sendMessage(ChatColor.RED + Config.inventoryFull);
-                    } else if (p.getGameMode() != GameMode.CREATIVE) {
-                        as.remove();
-                    }
-                }
+                final World w = p.getWorld();
+                final boolean commandFeedback = Boolean.TRUE.equals(w.getGameRuleValue(GameRule.SEND_COMMAND_FEEDBACK));
+                if (commandFeedback)
+                    w.setGameRule(GameRule.SEND_COMMAND_FEEDBACK, false);
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.createGiveCommand(as, p));
+                if (commandFeedback)
+                    w.setGameRule(GameRule.SEND_COMMAND_FEEDBACK, true);
                 break;
             default:
                 return;
