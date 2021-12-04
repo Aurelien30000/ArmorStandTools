@@ -6,16 +6,16 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 public class AST extends JavaPlugin {
 
@@ -40,6 +41,8 @@ public class AST extends JavaPlugin {
 
     static AST plugin;
     static String nmsVersion;
+
+    static final Pattern MC_USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_]{1,16}$");
 
     @Override
     public void onLoad() {
@@ -216,12 +219,20 @@ public class AST extends JavaPlugin {
             Bukkit.getScheduler().cancelTask(waitingForSkull.get(uuid).getValue());
             waitingForSkull.remove(uuid);
         }
-        p.sendTitle(" ", ChatColor.GOLD + Config.enterName, 0, 600, 0);
-        p.sendMessage(ChatColor.GOLD + Config.enterName2 + " &");
+        if (Config.useCommandForTextInput) {
+            final String msg1 = ChatColor.GOLD + Config.enterNameC + ": " + ChatColor.GREEN + "/ast <Armor Stand Name>";
+            p.sendTitle(" ", msg1, 0, 600, 0);
+            p.sendMessage(msg1);
+            p.sendMessage(ChatColor.GOLD + Config.enterNameC2 + ": " + ChatColor.GREEN + "/ast &");
+        } else {
+            p.sendTitle(" ", ChatColor.GOLD + Config.enterName, 0, 600, 0);
+            p.sendMessage(ChatColor.GOLD + Config.enterName2 + " &");
+        }
         int taskID = new BukkitRunnable() {
             @Override
             public void run() {
-                if (!waitingForName.containsKey(uuid)) return;
+                if (!waitingForName.containsKey(uuid))
+                    return;
                 waitingForName.remove(uuid);
                 p.sendMessage(ChatColor.RED + Config.inputTimeout);
             }
@@ -235,12 +246,19 @@ public class AST extends JavaPlugin {
             Bukkit.getScheduler().cancelTask(waitingForName.get(uuid).getValue());
             waitingForName.remove(uuid);
         }
-        p.sendTitle(" ", ChatColor.GOLD + Config.enterSkull, 0, 600, 0);
-        p.sendMessage(ChatColor.GOLD + Config.enterSkull);
+        if (Config.useCommandForTextInput) {
+            String msg1 = ChatColor.GOLD + Config.enterSkullC + ": " + ChatColor.GREEN + "/ast <MC Username For Skull>";
+            p.sendTitle(" ", msg1, 0, 600, 0);
+            p.sendMessage(msg1);
+        } else {
+            p.sendTitle(" ", ChatColor.GOLD + Config.enterSkull, 0, 600, 0);
+            p.sendMessage(ChatColor.GOLD + Config.enterSkull);
+        }
         int taskID = new BukkitRunnable() {
             @Override
             public void run() {
-                if (!waitingForSkull.containsKey(uuid)) return;
+                if (!waitingForSkull.containsKey(uuid))
+                    return;
                 waitingForSkull.remove(uuid);
                 p.sendMessage(ChatColor.RED + Config.inputTimeout);
             }
@@ -297,6 +315,88 @@ public class AST extends JavaPlugin {
         if (!Config.showDebugMessages)
             return;
         Bukkit.getLogger().log(Level.INFO, "[AST DEBUG] " + msg);
+    }
+
+    static ArmorStand getArmorStand(UUID uuid, World w) {
+        if (uuid != null && w != null) {
+            for (Entity e : w.getEntities()) {
+                if (e instanceof ArmorStand && e.getUniqueId().equals(uuid)) {
+                    return (ArmorStand) e;
+                }
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings("deprecation")
+    static ItemStack getPlayerHead(String playerName) {
+        OfflinePlayer offlinePlayer = Bukkit.getServer().getPlayer(playerName);
+        if (offlinePlayer == null) {
+            offlinePlayer = Bukkit.getOfflinePlayer(playerName);
+        }
+        final ItemStack item = new ItemStack(Material.PLAYER_HEAD);
+        final SkullMeta meta = (SkullMeta) item.getItemMeta();
+        if (meta == null) {
+            Bukkit.getLogger().warning("Skull item meta was null");
+            return item;
+        }
+        meta.setOwningPlayer(offlinePlayer);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    static boolean processInput(Player p, final String in) {
+        final UUID plrUuid = p.getUniqueId();
+        final UUID uuid;
+        boolean name;
+        int taskId;
+        if (AST.waitingForName.containsKey(plrUuid)) {
+            uuid = AST.waitingForName.get(plrUuid).getKey();
+            taskId = AST.waitingForName.get(plrUuid).getValue();
+            name = true;
+        } else if (AST.waitingForSkull.containsKey(plrUuid)) {
+            uuid = AST.waitingForSkull.get(plrUuid).getKey();
+            taskId = AST.waitingForSkull.get(plrUuid).getValue();
+            name = false;
+        } else {
+            return false;
+        }
+        Bukkit.getScheduler().cancelTask(taskId);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                final ArmorStand as = getArmorStand(uuid, p.getWorld());
+                if (as != null) {
+                    String input = ChatColor.translateAlternateColorCodes('&', in);
+                    if (input.equals("&")) input = "";
+                    if (name) {
+                        if (input.length() > 0) {
+                            as.setCustomName(input);
+                            as.setCustomNameVisible(true);
+                            p.sendMessage(ChatColor.GREEN + Config.nameSet);
+                        } else {
+                            as.setCustomName("");
+                            as.setCustomNameVisible(false);
+                            as.setCustomNameVisible(false);
+                            p.sendMessage(ChatColor.GREEN + Config.nameRemoved);
+                        }
+                    } else {
+                        if (MC_USERNAME_PATTERN.matcher(input).matches()) {
+                            if (as.getEquipment() != null) {
+                                as.getEquipment().setHelmet(getPlayerHead(input));
+                                p.sendMessage(ChatColor.GREEN + Config.skullSet);
+                            }
+                        } else {
+                            p.sendMessage(ChatColor.RED + input + " " + Config.invalidName);
+                        }
+                    }
+                }
+                AST.waitingForName.remove(plrUuid);
+                AST.waitingForSkull.remove(plrUuid);
+                Utils.title(p, " ");
+            }
+        }.runTask(AST.plugin);
+        return true;
     }
 
 }

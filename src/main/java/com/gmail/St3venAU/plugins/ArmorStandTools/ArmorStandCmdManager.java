@@ -138,7 +138,8 @@ class ArmorStandCmdManager {
         for (String tag : armorStand.getScoreboardTags()) {
             if (tag.startsWith("ast-cdn-")) {
                 final String[] split = tag.split("ast-cdn-");
-                if (split.length < 2 || split[1].length() < 1) return -1;
+                if (split.length < 2 || split[1].length() < 1)
+                    return -1;
                 try {
                     return Integer.parseInt(split[1]);
                 } catch (NumberFormatException e) {

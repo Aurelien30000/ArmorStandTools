@@ -116,7 +116,8 @@ class ArmorStandGUI implements Listener {
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (!event.getInventory().equals(i)) return;
+        if (!event.getInventory().equals(i))
+            return;
         HandlerList.unregisterAll(this);
         inUse.remove(as.getEntityId());
     }

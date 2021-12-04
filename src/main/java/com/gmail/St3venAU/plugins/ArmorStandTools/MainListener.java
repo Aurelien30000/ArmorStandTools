@@ -3,7 +3,10 @@ package com.gmail.st3venau.plugins.armorstandtools;
 import com.destroystokyo.paper.event.player.PlayerAdvancementCriterionGrantEvent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.entity.*;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -22,18 +25,14 @@ import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 public class MainListener implements Listener {
-
-    private final Pattern MC_USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_]{1,16}$");
 
     @EventHandler
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
@@ -194,7 +193,8 @@ public class MainListener implements Listener {
         for (ArmorStandTool t : ArmorStandTool.values()) {
             drops.remove(t.getItem());
         }
-        if (Boolean.TRUE.equals(p.getWorld().getGameRuleValue(GameRule.KEEP_INVENTORY))) return;
+        if (Boolean.TRUE.equals(p.getWorld().getGameRuleValue(GameRule.KEEP_INVENTORY)))
+            return;
         if (Bukkit.getServer().getPluginManager().getPermission("essentials.keepinv") != null && Utils.hasPermissionNode(p, "essentials.keepinv"))
             return;
         if (AST.savedInventories.containsKey(p.getUniqueId())) {
@@ -349,73 +349,11 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
-        final Player p = event.getPlayer();
-        final UUID plrUuid = p.getUniqueId();
-        final UUID uuid;
-        final boolean name;
-        final int taskId;
-        if (AST.waitingForName.containsKey(plrUuid)) {
-            uuid = AST.waitingForName.get(plrUuid).getKey();
-            taskId = AST.waitingForName.get(plrUuid).getValue();
-            name = true;
-        } else if (AST.waitingForSkull.containsKey(plrUuid)) {
-            uuid = AST.waitingForSkull.get(plrUuid).getKey();
-            taskId = AST.waitingForSkull.get(plrUuid).getValue();
-            name = false;
-        } else {
+        if (Config.useCommandForTextInput)
             return;
+        if (AST.processInput(event.getPlayer(), event.getMessage())) {
+            event.setCancelled(true);
         }
-        event.setCancelled(true);
-        Bukkit.getScheduler().cancelTask(taskId);
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                final ArmorStand as = getArmorStand(uuid, p.getWorld());
-                if (as != null) {
-                    String input = ChatColor.translateAlternateColorCodes('&', event.getMessage());
-                    if (input.equals("&")) input = "";
-                    if (name) {
-                        if (input.length() > 0) {
-                            as.setCustomName(input);
-                            as.setCustomNameVisible(true);
-                            p.sendMessage(ChatColor.GREEN + Config.nameSet);
-                        } else {
-                            as.setCustomName("");
-                            as.setCustomNameVisible(false);
-                            as.setCustomNameVisible(false);
-                            p.sendMessage(ChatColor.GREEN + Config.nameRemoved);
-                        }
-                    } else {
-                        if (MC_USERNAME_PATTERN.matcher(input).matches()) {
-                            as.getEquipment();
-                            as.getEquipment().setHelmet(getPlayerHead(input));
-                            p.sendMessage(ChatColor.GREEN + Config.skullSet);
-                        } else {
-                            p.sendMessage(ChatColor.RED + input + " " + Config.invalidName);
-                        }
-                    }
-                    AST.waitingForName.remove(plrUuid);
-                    AST.waitingForSkull.remove(plrUuid);
-                    Utils.title(p, " ");
-                }
-            }
-        }.runTask(AST.plugin);
-    }
-
-    private ItemStack getPlayerHead(String playerName) {
-        OfflinePlayer offlinePlayer = Bukkit.getServer().getPlayer(playerName);
-        if (offlinePlayer == null) {
-            offlinePlayer = Bukkit.getOfflinePlayer(playerName);
-        }
-        final ItemStack item = new ItemStack(Material.PLAYER_HEAD);
-        final SkullMeta meta = (SkullMeta) item.getItemMeta();
-        if (meta == null) {
-            Bukkit.getLogger().warning("Skull item meta was null");
-            return item;
-        }
-        meta.setOwningPlayer(offlinePlayer);
-        item.setItemMeta(meta);
-        return item;
     }
 
     @EventHandler
@@ -429,17 +367,6 @@ public class MainListener implements Listener {
             event.setCancelled(true);
             p.sendMessage(ChatColor.RED + Config.cmdNotAllowed);
         }
-    }
-
-    private ArmorStand getArmorStand(UUID uuid, World w) {
-        if (uuid != null && w != null) {
-            for (Entity e : w.getEntities()) {
-                if (e instanceof ArmorStand && e.getUniqueId().equals(uuid)) {
-                    return (ArmorStand) e;
-                }
-            }
-        }
-        return null;
     }
 
     @EventHandler(ignoreCancelled = true)
