@@ -164,6 +164,12 @@ public class Utils {
         return tags.length() == 0 ? "" : tags.toString();
     }
 
+    static private int getItemCustomModelData(ItemStack is) {
+        if (is == null || is.getItemMeta() == null || !is.getItemMeta().hasCustomModelData())
+            return 0;
+        return is.getItemMeta().getCustomModelData();
+    }
+
     static private String skullOwner(ItemStack is) {
         if (is == null || is.getItemMeta() == null || !(is.getItemMeta() instanceof SkullMeta skull))
             return "";
@@ -185,6 +191,7 @@ public class Utils {
         final String itemStackTags = getItemStackTags(is);
         @SuppressWarnings("deprecation") final short durability = is.getDurability();
         final String skullOwner = skullOwner(is);
+        final int customModelData = getItemCustomModelData(is);
         int n = 0;
         if (itemStackTags.length() > 0 || durability > 0 || skullOwner.length() > 0) {
             sb.append(",tag:{");
@@ -192,13 +199,21 @@ public class Utils {
                 sb.append("Damage:").append(durability);
                 n++;
             }
+            if (customModelData > 0) {
+                if (n > 0)
+                    sb.append(",");
+                sb.append("CustomModelData:").append(customModelData);
+                n++;
+            }
             if (itemStackTags.length() > 0) {
-                if (n > 0) sb.append(",");
+                if (n > 0)
+                    sb.append(",");
                 sb.append(itemStackTags);
                 n++;
             }
             if (skullOwner.length() > 0) {
-                if (n > 0) sb.append(",");
+                if (n > 0)
+                    sb.append(",");
                 sb.append(skullOwner);
             }
             sb.append("}");
@@ -258,7 +273,7 @@ public class Utils {
     }
 
     static String createGiveCommand(ArmorStand as, Player p) {
-        final StringBuilder sb = new StringBuilder("give ");
+        final StringBuilder sb = new StringBuilder("minecraft:give ");
         sb.append(p.getName()).append(" minecraft:armor_stand{Enchantments:[{id:unbreaking,lvl:1}],HideFlags:1,display:{Name:");
         sb.append(quote(Config.configuredArmorStand));
         sb.append(",Lore:[");
