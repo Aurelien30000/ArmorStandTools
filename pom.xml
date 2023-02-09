@@ -25,18 +25,6 @@
             <url>https://maven.enginehub.org/repo/</url>
         </repository>
         <repository>
-            <id>intellectualsites releases</id>
-            <url>https://mvn.intellectualsites.com/content/repositories/releases/</url>
-        </repository>
-        <repository>
-            <id>intellectualsites snapshots</id>
-            <url>https://mvn.intellectualsites.com/content/repositories/snapshots/</url>
-        </repository>
-        <repository> <!-- needed due to missing dependency on PlotSquared for adventure-text-minimessage -->
-            <id>sonatype-oss-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </repository>
-        <repository>
             <id>chestshop-repo</id>
             <url>https://repo.minebench.de/</url>
         </repository>
@@ -46,26 +34,37 @@
         </repository>
     </repositories>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.intellectualsites.bom</groupId>
+                <artifactId>bom-1.18.x</artifactId>
+                <version>1.23</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- Paper -->
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.18.1-R0.1-SNAPSHOT</version>
+            <version>1.19.3-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- WorldGuard -->
         <dependency>
             <groupId>com.sk89q.worldguard</groupId>
             <artifactId>worldguard-bukkit</artifactId>
-            <version>7.0.7-SNAPSHOT</version>
+            <version>7.0.8-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- PlotSquared Core API -->
         <dependency>
             <groupId>com.plotsquared</groupId>
             <artifactId>PlotSquared-Core</artifactId>
-            <version>6.1.3</version>
             <scope>provided</scope>
         </dependency>
         <!-- CHestShop API -->
@@ -79,7 +78,7 @@
         <dependency>
             <groupId>com.github.brcdev-minecraft</groupId>
             <artifactId>shopgui-api</artifactId>
-            <version>2.2.0</version>
+            <version>3.0.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

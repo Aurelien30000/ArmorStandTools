@@ -49,7 +49,7 @@ public class MainListener implements Listener {
             return;
         }
         final ArmorStandTool tool = ArmorStandTool.get(p);
-        if (tool == null && p.isSneaking() && Config.crouchRightClickOpensGUI && Utils.hasPermissionNode(p, "astools.use")) {
+        if (!event.isCancelled() && tool == null && p.isSneaking() && Config.crouchRightClickOpensGUI && Utils.hasPermissionNode(p, "astools.use")) {
             if (!AST.playerHasPermission(p, as.getLocation().getBlock(), null)) {
                 p.sendMessage(ChatColor.RED + Config.generalNoPerm);
                 return;
