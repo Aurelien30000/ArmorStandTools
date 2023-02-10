@@ -15,16 +15,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -165,6 +163,25 @@ public class AST extends JavaPlugin {
         final PlayerInventory i = p.getInventory();
         for (ArmorStandTool t : ArmorStandTool.values()) {
             i.remove(t.getItem());
+
+            final Collection<? extends ItemStack> materialItems = i.all(t.getItem().getType()).values();
+            final ItemMeta toolMeta = t.getItem().getItemMeta();
+            if (toolMeta == null) {
+                continue;
+            }
+
+            final String toolLocalizedName = toolMeta.getLocalizedName();
+            for (ItemStack invItem : materialItems) {
+                final ItemMeta inventoryItemMeta = invItem.getItemMeta();
+
+                if (inventoryItemMeta == null) {
+                    continue;
+                }
+
+                if (toolLocalizedName.equals(inventoryItemMeta.getLocalizedName())) {
+                    i.remove(invItem);
+                }
+            }
         }
     }
 
