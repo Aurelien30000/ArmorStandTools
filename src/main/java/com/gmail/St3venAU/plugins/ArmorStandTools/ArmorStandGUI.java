@@ -270,7 +270,7 @@ class ArmorStandGUI implements Listener {
                     p.closeInventory();
                     break;
                 }
-                p.getWorld().dropItemNaturally(as.getLocation(), stack).setPickupDelay(0);
+                p.getWorld().dropItemNaturally(p.getLocation(), stack).setPickupDelay(0);
                 p.closeInventory();
                 if (p.getGameMode() != GameMode.CREATIVE) {
                     as.remove();
