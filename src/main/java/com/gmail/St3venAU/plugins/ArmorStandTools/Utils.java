@@ -5,16 +5,15 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.CommandBlock;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.*;
+import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
@@ -23,7 +22,10 @@ import org.bukkit.util.Vector;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 public class Utils {
 
@@ -134,36 +136,6 @@ public class Utils {
         return false;
     }
 
-    static private String getItemStackTags(ItemStack is) {
-        if (is == null) {
-            return "";
-        }
-        final StringBuilder tags = new StringBuilder();
-        if (is.getItemMeta() != null && is.getItemMeta() instanceof LeatherArmorMeta armorMeta) {
-            tags.append("display:{color:");
-            tags.append(armorMeta.getColor().asRGB());
-            tags.append("}");
-        }
-        final Map<Enchantment, Integer> enchants = is.getEnchantments();
-        if (enchants.size() > 0) {
-            if (tags.length() > 0) {
-                tags.append(",");
-            }
-            tags.append("Enchantments:[");
-
-            for (Enchantment e : enchants.keySet()) {
-                tags.append("{id:");
-                tags.append(e.getKey().getKey());
-                tags.append(",lvl:");
-                tags.append(enchants.get(e));
-                tags.append("},");
-            }
-
-            tags.setCharAt(tags.length() - 1, ']');
-        }
-        return tags.length() == 0 ? "" : tags.toString();
-    }
-
     static private int getItemCustomModelData(ItemStack is) {
         if (is == null || is.getItemMeta() == null || !is.getItemMeta().hasCustomModelData())
             return 0;
@@ -188,35 +160,10 @@ public class Utils {
         if (is.getAmount() > 0) {
             sb.append(",Count:").append(is.getAmount());
         }
-        final String itemStackTags = getItemStackTags(is);
-        @SuppressWarnings("deprecation") final short durability = is.getDurability();
-        final String skullOwner = skullOwner(is);
-        final int customModelData = getItemCustomModelData(is);
-        int n = 0;
-        if (itemStackTags.length() > 0 || durability > 0 || skullOwner.length() > 0) {
-            sb.append(",tag:{");
-            if (durability > 0) {
-                sb.append("Damage:").append(durability);
-                n++;
-            }
-            if (customModelData > 0) {
-                if (n > 0)
-                    sb.append(",");
-                sb.append("CustomModelData:").append(customModelData);
-                n++;
-            }
-            if (itemStackTags.length() > 0) {
-                if (n > 0)
-                    sb.append(",");
-                sb.append(itemStackTags);
-                n++;
-            }
-            if (skullOwner.length() > 0) {
-                if (n > 0)
-                    sb.append(",");
-                sb.append(skullOwner);
-            }
-            sb.append("}");
+        final String itemStackTags = ItemStackReflections.itemNBTToString(is);
+        if (itemStackTags != null && !itemStackTags.isEmpty()) {
+            sb.append(",tag:");
+            sb.append(itemStackTags);
         }
         sb.append("}");
         return sb.toString();
@@ -269,22 +216,28 @@ public class Utils {
     }
 
     static String quote(String s) {
-        return "\"\\\"" + s + "\\\"\"";
+        return "\"\\\"" +
+                s.replace("\\", "\\\\\\\\").replace("\"", "\\\\\\\"") // escape " and \
+                + "\\\"\"";
     }
 
-    static String createGiveCommand(ArmorStand as, Player p) {
-        final StringBuilder sb = new StringBuilder("minecraft:give ");
-        sb.append(p.getName()).append(" minecraft:armor_stand{Enchantments:[{id:unbreaking,lvl:1}],HideFlags:1,display:{Name:");
-        sb.append(quote(Config.configuredArmorStand));
-        sb.append(",Lore:[");
-        boolean comma = false;
-        for (String s : createItemLore(as)) {
-            if (comma) sb.append(",");
-            comma = true;
-            sb.append(quote(s));
+    static ItemStack createArmorStandItem(ArmorStand as) {
+        final EntityEquipment equipment = as.getEquipment();
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            if (canArmorStandItemContain(equipment.getItem(slot)))
+                return null;
         }
-        sb.append("]},EntityTag:").append(createEntityTag(as)).append("}");
-        return sb.toString();
+        final ItemStack armorStand = new ItemStack(Material.ARMOR_STAND);
+        ItemStackReflections.setItemNBTFromString(armorStand, "{EntityTag:" + createEntityTag(as) + "}");
+        final ItemMeta meta = armorStand.getItemMeta();
+        if (meta != null) {
+            meta.setLore(createItemLore(as));
+            meta.setDisplayName(Config.configuredArmorStand);
+            meta.addEnchant(Enchantment.DURABILITY, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        }
+        armorStand.setItemMeta(meta);
+        return armorStand;
     }
 
     static String createEntityTag(ArmorStand as) {
@@ -328,29 +281,12 @@ public class Utils {
         }
         int stacks = 0;
         int items = 0;
-        if (e.getHelmet() != null) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            final ItemStack item = e.getItem(slot);
+            if (item.getType().isAir())
+                continue;
             stacks++;
-            items += e.getHelmet().getAmount();
-        }
-        if (e.getChestplate() != null) {
-            stacks++;
-            items += e.getChestplate().getAmount();
-        }
-        if (e.getLeggings() != null) {
-            stacks++;
-            items += e.getLeggings().getAmount();
-        }
-        if (e.getBoots() != null) {
-            stacks++;
-            items += e.getBoots().getAmount();
-        }
-        if (Material.AIR != e.getItemInMainHand().getType()) {
-            stacks++;
-            items += e.getItemInMainHand().getAmount();
-        }
-        if (Material.AIR != e.getItemInOffHand().getType()) {
-            stacks++;
-            items += e.getItemInOffHand().getAmount();
+            items += item.getAmount();
         }
         if (stacks > 0) {
             lore.add(Config.inventory + ": " + ChatColor.YELLOW + items + " " + Config.items + " (" + stacks + " " + Config.stacks + ")");
@@ -486,6 +422,16 @@ public class Utils {
         }
         clone.setMetadata("clone", new FixedMetadataValue(AST.plugin, true));
         return clone;
+    }
+
+    static boolean isConfiguredArmorStandItem(ItemStack item) {
+        return item.getType() == Material.ARMOR_STAND && ItemStackReflections.containsEntityTag(item);
+    }
+
+
+    static boolean canArmorStandItemContain(ItemStack item) {
+        return !isConfiguredArmorStandItem(item) &&
+                !(item.getItemMeta() instanceof final BlockStateMeta meta && meta.getBlockState() instanceof ShulkerBox);
     }
 
 }

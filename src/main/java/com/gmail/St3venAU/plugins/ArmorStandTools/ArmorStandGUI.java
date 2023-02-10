@@ -265,7 +265,12 @@ class ArmorStandGUI implements Listener {
                 Utils.title(p, Config.glow + ": " + (glowing ? Config.isOn : Config.isOff));
                 break;
             case ITEM:
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.createGiveCommand(as, p));
+                ItemStack stack = Utils.createArmorStandItem(as);
+                if (stack == null) {
+                    p.closeInventory();
+                    break;
+                }
+                p.getWorld().dropItemNaturally(as.getLocation(), stack).setPickupDelay(0);
                 p.closeInventory();
                 if (p.getGameMode() != GameMode.CREATIVE) {
                     as.remove();

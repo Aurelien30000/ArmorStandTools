@@ -58,7 +58,7 @@ wgNoPerm: 'No permission to alter an armor stand in this region'
 noCommandPerm: 'You do not have permission to use this command'
 armorStand: 'Armor Stand'
 none: 'None'
-guiInUse: 'This armor stands GUI is in use'
+guiInUse: "This armor stand's GUI is in use"
 # New since v2.4.0:
 noASNearBy: 'No armor stand found near by'
 closestAS: 'Closest armor stand'
