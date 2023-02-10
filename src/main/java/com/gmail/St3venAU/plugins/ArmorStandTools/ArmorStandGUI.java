@@ -265,13 +265,7 @@ class ArmorStandGUI implements Listener {
                 Utils.title(p, Config.glow + ": " + (glowing ? Config.isOn : Config.isOff));
                 break;
             case ITEM:
-                final World w = p.getWorld();
-                final boolean commandFeedback = Boolean.TRUE.equals(w.getGameRuleValue(GameRule.SEND_COMMAND_FEEDBACK));
-                if (commandFeedback)
-                    w.setGameRule(GameRule.SEND_COMMAND_FEEDBACK, false);
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.createGiveCommand(as, p));
-                if (commandFeedback)
-                    w.setGameRule(GameRule.SEND_COMMAND_FEEDBACK, true);
                 p.closeInventory();
                 if (p.getGameMode() != GameMode.CREATIVE) {
                     as.remove();
