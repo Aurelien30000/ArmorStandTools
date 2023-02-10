@@ -1,6 +1,6 @@
-package com.gmail.st3venau.plugins.armorstandtools.hooks;
+package com.gmail.St3venAU.plugins.ArmorStandTools.hooks;
 
-import com.gmail.st3venau.plugins.armorstandtools.AST;
+import com.gmail.St3venAU.plugins.ArmorStandTools.AST;
 import com.plotsquared.core.PlotAPI;
 import com.plotsquared.core.player.PlotPlayer;
 import com.plotsquared.core.plot.Plot;

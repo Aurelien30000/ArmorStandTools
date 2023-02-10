@@ -1,8 +1,8 @@
-package com.gmail.st3venau.plugins.armorstandtools;
+package com.gmail.St3venAU.plugins.ArmorStandTools;
 
-import com.gmail.st3venau.plugins.armorstandtools.hooks.ChestShopHook;
-import com.gmail.st3venau.plugins.armorstandtools.hooks.PlotSquaredHook;
-import com.gmail.st3venau.plugins.armorstandtools.hooks.ShopGuiPlusHook;
+import com.gmail.St3venAU.plugins.ArmorStandTools.hooks.ChestShopHook;
+import com.gmail.St3venAU.plugins.ArmorStandTools.hooks.PlotSquaredHook;
+import com.gmail.St3venAU.plugins.ArmorStandTools.hooks.ShopGuiPlusHook;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;

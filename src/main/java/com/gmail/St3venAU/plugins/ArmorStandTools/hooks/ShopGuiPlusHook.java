@@ -1,6 +1,6 @@
-package com.gmail.st3venau.plugins.armorstandtools.hooks;
+package com.gmail.St3venAU.plugins.ArmorStandTools.hooks;
 
-import com.gmail.st3venau.plugins.armorstandtools.AST;
+import com.gmail.St3venAU.plugins.ArmorStandTools.AST;
 import net.brcdev.shopgui.event.ShopPreTransactionEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

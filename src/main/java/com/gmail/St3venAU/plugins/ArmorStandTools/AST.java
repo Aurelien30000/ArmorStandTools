@@ -1,6 +1,6 @@
-package com.gmail.st3venau.plugins.armorstandtools;
+package com.gmail.St3venAU.plugins.ArmorStandTools;
 
-import com.gmail.st3venau.plugins.armorstandtools.hooks.PlotSquaredHook;
+import com.gmail.St3venAU.plugins.ArmorStandTools.hooks.PlotSquaredHook;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.StateFlag;
