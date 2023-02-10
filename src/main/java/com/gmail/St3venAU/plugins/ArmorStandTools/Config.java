@@ -55,7 +55,7 @@ class Config {
     static boolean saveToolCreatesCommandBlock = true;
     static boolean logGeneratedSummonCommands = false;
     static boolean crouchRightClickOpensGUI = false;
-    static boolean useCommandForTextInput       = false;
+    static boolean useCommandForTextInput = false;
 
     static final List<String> deniedCommands = new ArrayList<>();
 
@@ -114,7 +114,7 @@ class Config {
         saveToolCreatesCommandBlock = config.getBoolean("saveToolCreatesCommandBlock", true);
         logGeneratedSummonCommands = config.getBoolean("logGeneratedSummonCommands", false);
         crouchRightClickOpensGUI = config.getBoolean("crouchRightClickOpensGUI", false);
-        useCommandForTextInput      = config.getBoolean("useCommandForTextInput", false);
+        useCommandForTextInput = config.getBoolean("useCommandForTextInput", false);
 
         AST.activeTool.clear();
         AST.selectedArmorStand.clear();

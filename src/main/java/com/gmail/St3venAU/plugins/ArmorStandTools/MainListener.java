@@ -102,7 +102,8 @@ public class MainListener implements Listener {
                     as.teleport(l);
                 }
                 case GUI -> new ArmorStandGUI(as, p);
-                default -> cancel = tool == ArmorStandTool.SUMMON || tool == ArmorStandTool.GEN_CMD || event.isCancelled();
+                default ->
+                        cancel = tool == ArmorStandTool.SUMMON || tool == ArmorStandTool.GEN_CMD || event.isCancelled();
             }
             event.setCancelled(cancel);
             return;
