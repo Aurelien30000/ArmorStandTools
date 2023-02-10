@@ -224,7 +224,7 @@ public class Utils {
     static ItemStack createArmorStandItem(ArmorStand as) {
         final EntityEquipment equipment = as.getEquipment();
         for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (canArmorStandItemContain(equipment.getItem(slot)))
+            if (!canArmorStandItemContain(equipment.getItem(slot)))
                 return null;
         }
         final ItemStack armorStand = new ItemStack(Material.ARMOR_STAND);
