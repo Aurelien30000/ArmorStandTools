@@ -6,7 +6,7 @@
 
     <groupId>com.gmail.st3venau.plugins</groupId>
     <artifactId>ArmorStandTools</artifactId>
-    <version>4.5.0</version>
+    <version>4.6.0</version>
     <name>ArmorStandTools</name>
 
     <properties>
@@ -51,14 +51,14 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.19.3-R0.1-SNAPSHOT</version>
+            <version>1.20-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- WorldGuard -->
         <dependency>
             <groupId>com.sk89q.worldguard</groupId>
             <artifactId>worldguard-bukkit</artifactId>
-            <version>7.0.8-SNAPSHOT</version>
+            <version>7.0.9-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- PlotSquared Core API -->
@@ -82,7 +82,6 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-
 
     <build>
         <defaultGoal>clean package install</defaultGoal>
