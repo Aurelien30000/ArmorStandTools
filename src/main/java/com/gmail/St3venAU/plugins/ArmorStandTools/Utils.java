@@ -1,6 +1,7 @@
 package com.gmail.St3venAU.plugins.ArmorStandTools;
 
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class Utils {
 
@@ -379,9 +381,35 @@ public class Utils {
         p.setMetadata("lastEvent", new FixedMetadataValue(AST.plugin, System.currentTimeMillis()));
     }
 
-    static ArmorStand cloneArmorStand(ArmorStand as) {
-        final ArmorStand clone = (ArmorStand) as.getWorld().spawnEntity(as.getLocation().add(1, 0, 0), EntityType.ARMOR_STAND);
+    static ArmorStand cloneArmorStand(Player p, ArmorStand as) {
+        final Inventory inventory = p.getInventory();
         final EntityEquipment asEquipment = as.getEquipment();
+        final GameMode gameMode = p.getGameMode();
+        if (gameMode == GameMode.ADVENTURE || gameMode == GameMode.SURVIVAL) {
+            final List<ItemStack> required = Stream.of(
+                            new ItemStack(Material.ARMOR_STAND),
+                            asEquipment.getHelmet(),
+                            asEquipment.getChestplate(),
+                            asEquipment.getLeggings(),
+                            asEquipment.getBoots(),
+                            asEquipment.getItemInMainHand(),
+                            asEquipment.getItemInOffHand()
+                    )
+                    .filter(itemStack -> itemStack != null && !itemStack.getType().isAir())
+                    .toList();
+
+            for (ItemStack itemStack : required) {
+                if (!inventory.containsAtLeast(itemStack, itemStack.getAmount())) {
+                    p.sendMessage(ChatColor.RED + Config.generalNoPerm);
+                    return null;
+                }
+            }
+            for (ItemStack itemStack : required) {
+                inventory.removeItemAnySlot(itemStack);
+            }
+        }
+
+        final ArmorStand clone = (ArmorStand) as.getWorld().spawnEntity(as.getLocation().add(1, 0, 0), EntityType.ARMOR_STAND);
         final EntityEquipment cloneEquipment = clone.getEquipment();
         cloneEquipment.setHelmet(asEquipment.getHelmet());
         cloneEquipment.setChestplate(asEquipment.getChestplate());

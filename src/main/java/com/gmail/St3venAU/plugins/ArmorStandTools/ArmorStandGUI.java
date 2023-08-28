@@ -185,28 +185,25 @@ class ArmorStandGUI implements Listener {
             return;
         }
         switch (t) {
-            case HEAD:
-            case BODY:
-            case LARM:
-            case RARM:
-            case LLEG:
-            case RLEG:
+            case HEAD, BODY, LARM, RARM, LLEG, RLEG -> {
                 final UUID uuid = p.getUniqueId();
                 AST.activeTool.put(uuid, t);
                 AST.selectedArmorStand.put(uuid, as);
                 p.closeInventory();
                 t.showTitle(p);
-                break;
-            case INVIS:
+            }
+            case INVIS -> {
                 as.setVisible(!as.isVisible());
                 Utils.title(p, Config.asVisible + ": " + (as.isVisible() ? Config.isTrue : Config.isFalse));
-                break;
-            case CLONE:
-                ArmorStand clone = Utils.cloneArmorStand(as);
-                AST.pickUpArmorStand(clone, p, true);
-                Utils.title(p, Config.carrying);
-                break;
-            case GEN_CMD:
+            }
+            case CLONE -> {
+                ArmorStand clone = Utils.cloneArmorStand(p, as);
+                if (clone != null) {
+                    AST.pickUpArmorStand(clone, p, true);
+                    Utils.title(p, Config.carrying);
+                }
+            }
+            case GEN_CMD -> {
                 final String command = Utils.createSummonCommand(as);
                 p.sendMessage(command);
                 if (Config.saveToolCreatesCommandBlock) {
@@ -220,51 +217,50 @@ class ArmorStandGUI implements Listener {
                 if (Config.logGeneratedSummonCommands) {
                     Config.logSummonCommand(p.getName(), command);
                 }
-                break;
-            case SIZE:
+            }
+            case SIZE -> {
                 as.setSmall(!as.isSmall());
                 Utils.title(p, Config.size + ": " + (as.isSmall() ? Config.small : Config.normal));
-                break;
-            case BASE:
+            }
+            case BASE -> {
                 as.setBasePlate(!as.hasBasePlate());
                 Utils.title(p, Config.basePlate + ": " + (as.hasBasePlate() ? Config.isOn : Config.isOff));
-                break;
-            case GRAV:
+            }
+            case GRAV -> {
                 as.setGravity(!as.hasGravity());
                 Utils.title(p, Config.gravity + ": " + (as.hasGravity() ? Config.isOn : Config.isOff));
-                break;
-            case ARMS:
+            }
+            case ARMS -> {
                 as.setArms(!as.hasArms());
                 Utils.title(p, Config.arms + ": " + (as.hasArms() ? Config.isOn : Config.isOff));
-                break;
-            case NAME:
+            }
+            case NAME -> {
                 p.closeInventory();
                 AST.setName(p, as);
-                break;
-            case PHEAD:
+            }
+            case PHEAD -> {
                 p.closeInventory();
                 AST.setPlayerSkull(p, as);
-                break;
-            case INVUL:
+            }
+            case INVUL -> {
                 final boolean inv = !as.isInvulnerable();
                 as.setInvulnerable(inv);
                 Utils.title(p, Config.invul + ": " + (inv ? Config.isOn : Config.isOff));
-                break;
-            case SLOTS:
-                Utils.title(p, Config.equip + ": " + (Utils.toggleSlotsDisabled(as) ? Config.locked : Config.unLocked));
-                break;
-            case MOVE:
+            }
+            case SLOTS ->
+                    Utils.title(p, Config.equip + ": " + (Utils.toggleSlotsDisabled(as) ? Config.locked : Config.unLocked));
+            case MOVE -> {
                 p.closeInventory();
                 as.removeMetadata("clone", AST.plugin);
                 AST.pickUpArmorStand(as, p, false);
                 Utils.title(p, Config.carrying);
-                break;
-            case GLOW:
+            }
+            case GLOW -> {
                 boolean glowing = !as.isGlowing();
                 as.setGlowing(glowing);
                 Utils.title(p, Config.glow + ": " + (glowing ? Config.isOn : Config.isOff));
-                break;
-            case ITEM:
+            }
+            case ITEM -> {
                 ItemStack stack = Utils.createArmorStandItem(as);
                 if (stack == null) {
                     p.closeInventory();
@@ -275,9 +271,10 @@ class ArmorStandGUI implements Listener {
                 if (p.getGameMode() != GameMode.CREATIVE) {
                     as.remove();
                 }
-                break;
-            default:
+            }
+            default -> {
                 return;
+            }
         }
         i.setItem(t.getSlot(), t.updateLore(as));
     }
