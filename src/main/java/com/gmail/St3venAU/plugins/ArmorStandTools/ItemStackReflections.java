@@ -8,23 +8,18 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 public class ItemStackReflections {
+    private static final String CRAFTBUKKIT_PACKAGE = Bukkit.getServer().getClass().getPackage().getName();
     private final static Method AS_NMS_COPY;
     private final static Method GET_TAG;
     private final static Method MODIFY_ITEM_STACK;
     private final static Method CONTAINS;
     private final static Object CRAFT_MAGIC_NUMBERS;
-    private static final String SERVER_VERSION;
 
     static {
-        String name = Bukkit.getServer().getClass().getPackage().getName();
-        String[] split = name.split("\\.");
-        name = split[split.length - 1];
-        SERVER_VERSION = name;
-
         try {
             Class<?> mcItemStack = Class.forName("net.minecraft.world.item.ItemStack");
-            Class<?> bukkitItemStack = Class.forName("org.bukkit.craftbukkit." + SERVER_VERSION + ".inventory.CraftItemStack");
-            Class<?> craftMagicNumbers = Class.forName("org.bukkit.craftbukkit." + SERVER_VERSION + ".util.CraftMagicNumbers");
+            Class<?> bukkitItemStack = Class.forName(CRAFTBUKKIT_PACKAGE + ".inventory.CraftItemStack");
+            Class<?> craftMagicNumbers = Class.forName(CRAFTBUKKIT_PACKAGE + ".util.CraftMagicNumbers");
             Class<?> nbtTagCompound = Class.forName("net.minecraft.nbt.NBTTagCompound");
             AS_NMS_COPY = bukkitItemStack.getMethod("asNMSCopy", ItemStack.class);
             GET_TAG = mcItemStack.getDeclaredMethod("getTagClone");
