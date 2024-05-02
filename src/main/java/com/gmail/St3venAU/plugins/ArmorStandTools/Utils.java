@@ -235,7 +235,11 @@ public class Utils {
         if (meta != null) {
             meta.setLore(createItemLore(as));
             meta.setDisplayName(Config.configuredArmorStand);
-            meta.addEnchant(Enchantment.DURABILITY, 1, true);
+            Enchantment durability = Enchantment.getByName("DURABILITY");
+            if (durability == null) {
+                durability = Enchantment.UNBREAKING;
+            }
+            meta.addEnchant(durability, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
         armorStand.setItemMeta(meta);
