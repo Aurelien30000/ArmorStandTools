@@ -1,7 +1,9 @@
 package com.gmail.St3venAU.plugins.ArmorStandTools;
 
+import net.kyori.adventure.key.Key;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
@@ -11,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.EulerAngle;
 
 import java.util.Arrays;
@@ -80,7 +83,7 @@ public enum ArmorStandTool {
         if (meta != null) {
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-            meta.setLocalizedName("ArmorStandTool");
+            meta.getPersistentDataContainer().set(AST.toolKey, PersistentDataType.STRING, "ArmorStandTool");
             item.setItemMeta(meta);
         }
         this.config_id = config_id;

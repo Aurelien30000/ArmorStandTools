@@ -19,6 +19,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -38,6 +39,7 @@ public class AST extends JavaPlugin {
     static final Map<UUID, AbstractMap.SimpleEntry<UUID, Integer>> waitingForSkull = new HashMap<>(); // Player UUID, <ArmorStand UUID, Task ID>
 
     static AST plugin;
+    static NamespacedKey toolKey;
 
     static final Pattern MC_USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_]{1,16}$");
 
@@ -61,6 +63,7 @@ public class AST extends JavaPlugin {
     @Override
     public void onEnable() {
         plugin = this;
+        toolKey = new NamespacedKey(AST.plugin, "ArmorStandTool");
         getServer().getPluginManager().registerEvents(new MainListener(), this);
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         final Commands cmds = new Commands();
@@ -140,6 +143,26 @@ public class AST extends JavaPlugin {
         as.remove();
     }
 
+    private static boolean matches(ItemStack one, ItemStack two) {
+        if (one == null || two == null || one.getItemMeta() == null || two.getItemMeta() == null) {
+            return false;
+        }
+
+        String NameOne = one.getItemMeta().getDisplayName();
+        List<String> LoreOne = one.getItemMeta().getLore();
+        if (LoreOne == null) {
+            return false;
+        }
+
+        String NameTwo = two.getItemMeta().getDisplayName();
+        List<String> LoreTwo = two.getItemMeta().getLore();
+        if (LoreTwo == null) {
+            return false;
+        }
+
+        return NameOne.equals(NameTwo) && LoreOne.equals(LoreTwo);
+    }
+
     private static void removeAllTools(Player p) {
         final PlayerInventory i = p.getInventory();
         for (ArmorStandTool t : ArmorStandTool.values()) {
@@ -151,15 +174,15 @@ public class AST extends JavaPlugin {
                 continue;
             }
 
-            final String toolLocalizedName = toolMeta.getLocalizedName();
+            final String toolName = Objects.requireNonNull(toolMeta.getPersistentDataContainer().get(AST.toolKey, PersistentDataType.STRING));
             for (ItemStack invItem : materialItems) {
                 final ItemMeta inventoryItemMeta = invItem.getItemMeta();
-
-                if (inventoryItemMeta == null) {
+                final String inventoryToolName = invItem.getPersistentDataContainer().get(AST.toolKey, PersistentDataType.STRING);
+                if (inventoryToolName == null) {
                     continue;
                 }
 
-                if (toolLocalizedName.equals(inventoryItemMeta.getLocalizedName())) {
+                if (toolName.equals(inventoryToolName)) {
                     i.remove(invItem);
                 }
             }
