@@ -229,7 +229,7 @@ public class MainListener implements Listener {
             p.updateInventory();
             return;
         }
-        if (event.getAction() == InventoryAction.HOTBAR_SWAP || event.getAction() == InventoryAction.HOTBAR_MOVE_AND_READD) {
+        if (event.getAction() == InventoryAction.HOTBAR_SWAP) {
             if (Utils.hasAnyTools(p)) {
                 event.setCancelled(true);
                 p.updateInventory();

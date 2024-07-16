@@ -15,7 +15,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.EulerAngle;
@@ -138,37 +137,14 @@ public class Utils {
         return false;
     }
 
-    static private int getItemCustomModelData(ItemStack is) {
-        if (is == null || is.getItemMeta() == null || !is.getItemMeta().hasCustomModelData())
-            return 0;
-        return is.getItemMeta().getCustomModelData();
-    }
-
-    static private String skullOwner(ItemStack is) {
-        if (is == null || is.getItemMeta() == null || !(is.getItemMeta() instanceof SkullMeta skull))
-            return "";
-        return skull.getOwningPlayer() == null ? "" : "SkullOwner:\"" + skull.getOwner() + "\"";
-    }
-
     static private boolean isEmpty(ItemStack is) {
-        return is == null || is.getType() == Material.AIR;
+        return is == null || is.getType().isAir();
     }
 
     static private String itemInfo(ItemStack is) {
         if (isEmpty(is))
             return "{}";
-        final StringBuilder sb = new StringBuilder("{id:");
-        sb.append(is.getType().getKey().getKey());
-        if (is.getAmount() > 0) {
-            sb.append(",Count:").append(is.getAmount());
-        }
-        final String itemStackTags = ItemStackReflections.itemNBTToString(is);
-        if (itemStackTags != null && !itemStackTags.isEmpty()) {
-            sb.append(",tag:");
-            sb.append(itemStackTags);
-        }
-        sb.append("}");
-        return sb.toString();
+        return ItemStackReflections.itemNBTToString(is);
     }
 
     static private String armorItems(EntityEquipment e) {
@@ -230,16 +206,12 @@ public class Utils {
                 return null;
         }
         final ItemStack armorStand = new ItemStack(Material.ARMOR_STAND);
-        ItemStackReflections.setItemNBTFromString(armorStand, "{EntityTag:" + createEntityTag(as) + "}");
+        ItemStackReflections.setItemNBTFromString(armorStand, "minecraft:armor_stand[entity_data=" + createEntityTag(as) + "]");
         final ItemMeta meta = armorStand.getItemMeta();
         if (meta != null) {
             meta.setLore(createItemLore(as));
             meta.setDisplayName(Config.configuredArmorStand);
-            Enchantment durability = Enchantment.getByName("DURABILITY");
-            if (durability == null) {
-                durability = Enchantment.UNBREAKING;
-            }
-            meta.addEnchant(durability, 1, true);
+            meta.addEnchant(Enchantment.UNBREAKING, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
         armorStand.setItemMeta(meta);
@@ -249,6 +221,7 @@ public class Utils {
     static String createEntityTag(ArmorStand as) {
         final EntityEquipment e = as.getEquipment();
         final StringBuilder sb = new StringBuilder("{");
+        sb.append("id:\"minecraft:armor_stand\",");
         if (!as.isVisible())
             sb.append("Invisible:1,");
         if (!as.hasBasePlate())
@@ -457,9 +430,8 @@ public class Utils {
     }
 
     static boolean isConfiguredArmorStandItem(ItemStack item) {
-        return item.getType() == Material.ARMOR_STAND && ItemStackReflections.containsEntityTag(item);
+        return item.getType() == Material.ARMOR_STAND && ItemStackReflections.containsEntityData(item);
     }
-
 
     static boolean canArmorStandItemContain(ItemStack item) {
         return !isConfiguredArmorStandItem(item) &&

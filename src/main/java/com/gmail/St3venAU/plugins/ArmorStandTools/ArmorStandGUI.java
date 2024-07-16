@@ -1,6 +1,7 @@
 package com.gmail.St3venAU.plugins.ArmorStandTools;
 
 
+import com.destroystokyo.paper.MaterialTags;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.bukkit.*;
@@ -19,8 +20,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 class ArmorStandGUI implements Listener {
@@ -35,11 +34,6 @@ class ArmorStandGUI implements Listener {
     private static final IntSet inUse = new IntOpenHashSet();
     private static final IntSet invSlots = new IntOpenHashSet();
     private static ItemStack filler;
-
-    private static final Set<Material> helmetTypes = new HashSet<>();
-    private static final Set<Material> chestTypes = new HashSet<>();
-    private static final Set<Material> leggingTypes = new HashSet<>();
-    private static final Set<Material> bootTypes = new HashSet<>();
 
     private Inventory i;
     private ArmorStand as;
@@ -90,24 +84,6 @@ class ArmorStandGUI implements Listener {
         invSlots.add(INV_SLOT_BOOTS);
         invSlots.add(INV_SLOT_MAIN_HAND);
         invSlots.add(INV_SLOT_OFF_HAND);
-        for (Material m : Material.values()) {
-            final String name = m.name();
-            if (name.endsWith("_HELMET"))
-                helmetTypes.add(m);
-            if (name.endsWith("_CHESTPLATE"))
-                chestTypes.add(m);
-            if (name.endsWith("_LEGGINGS"))
-                leggingTypes.add(m);
-            if (name.endsWith("_BOOTS"))
-                bootTypes.add(m);
-        }
-        helmetTypes.add(Material.PLAYER_HEAD);
-        helmetTypes.add(Material.CREEPER_HEAD);
-        helmetTypes.add(Material.DRAGON_HEAD);
-        helmetTypes.add(Material.ZOMBIE_HEAD);
-        helmetTypes.add(Material.SKELETON_SKULL);
-        helmetTypes.add(Material.WITHER_SKELETON_SKULL);
-        helmetTypes.add(Material.JACK_O_LANTERN);
     }
 
     static boolean isInUse(ArmorStand as) {
@@ -144,17 +120,17 @@ class ArmorStandGUI implements Listener {
         if (event.getClick() == ClickType.SHIFT_LEFT) {
             event.setCancelled(true);
             ItemStack item = event.getCurrentItem();
-            if (slot > i.getSize() && item != null && !ArmorStandTool.isTool(item) && event.getClickedInventory() != null) {
+            if (slot >= i.getSize() && item != null && !ArmorStandTool.isTool(item) && event.getClickedInventory() != null) {
                 if (AST.checkBlockPermission(p, l.getBlock())) {
                     final Material m = item.getType();
                     final int newSlot;
-                    if (helmetTypes.contains(m) && slotIsEmpty(INV_SLOT_HELMET)) {
+                    if (MaterialTags.HEAD_EQUIPPABLE.isTagged(m) && slotIsEmpty(INV_SLOT_HELMET)) {
                         newSlot = INV_SLOT_HELMET;
-                    } else if (chestTypes.contains(m) && slotIsEmpty(INV_SLOT_CHEST)) {
+                    } else if (MaterialTags.CHEST_EQUIPPABLE.isTagged(m) && slotIsEmpty(INV_SLOT_CHEST)) {
                         newSlot = INV_SLOT_CHEST;
-                    } else if (leggingTypes.contains(m) && slotIsEmpty(INV_SLOT_LEGS)) {
+                    } else if (MaterialTags.LEGGINGS.isTagged(m) && slotIsEmpty(INV_SLOT_LEGS)) {
                         newSlot = INV_SLOT_LEGS;
-                    } else if (bootTypes.contains(m) && slotIsEmpty(INV_SLOT_BOOTS)) {
+                    } else if (MaterialTags.BOOTS.isTagged(m) && slotIsEmpty(INV_SLOT_BOOTS)) {
                         newSlot = INV_SLOT_BOOTS;
                     } else if (slotIsEmpty(INV_SLOT_MAIN_HAND)) {
                         newSlot = INV_SLOT_MAIN_HAND;
@@ -174,7 +150,7 @@ class ArmorStandGUI implements Listener {
             }
             return;
         }
-        if (slot > i.getSize())
+        if (slot >= i.getSize())
             return;
         event.setCancelled(true);
         final ArmorStandTool t = ArmorStandTool.get(event.getCurrentItem());

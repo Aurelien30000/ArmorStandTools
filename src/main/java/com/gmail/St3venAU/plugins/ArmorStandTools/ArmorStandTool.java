@@ -1,9 +1,7 @@
 package com.gmail.St3venAU.plugins.ArmorStandTools;
 
-import net.kyori.adventure.key.Key;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
@@ -114,12 +112,7 @@ public enum ArmorStandTool {
     }
 
     private boolean is(ItemStack is) {
-        return is != null &&
-                is.getType() == item.getType() &&
-                is.getItemMeta() != null &&
-                is.getItemMeta().hasDisplayName() &&
-                item.getItemMeta() != null &&
-                is.getItemMeta().getDisplayName().equals(item.getItemMeta().getDisplayName());
+        return is.isSimilar(item);
     }
 
     boolean isForGui() {
