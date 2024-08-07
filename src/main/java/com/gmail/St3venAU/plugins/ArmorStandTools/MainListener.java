@@ -134,7 +134,7 @@ public class MainListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
-        if (event.getTo().getWorld() == null || event.getTo().getWorld().equals(event.getFrom().getWorld()))
+        if (event.getTo() == null || event.getTo().getWorld() == null || event.getTo().getWorld().equals(event.getFrom().getWorld()))
             return;
         final Player p = event.getPlayer();
         final ArmorStand as = AST.getCarryingArmorStand(p);
