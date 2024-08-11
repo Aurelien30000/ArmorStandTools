@@ -6,7 +6,7 @@
 
     <groupId>com.gmail.st3venau.plugins</groupId>
     <artifactId>ArmorStandTools</artifactId>
-    <version>4.8.3</version>
+    <version>4.8.4</version>
     <name>ArmorStandTools</name>
 
     <properties>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21-R0.1-SNAPSHOT</version>
+            <version>1.21.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
